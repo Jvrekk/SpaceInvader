@@ -5,29 +5,38 @@
 #include <allegro5/allegro_primitives.h> 
 #include <stdbool.h>
 
-int windowHeight = 720;
-int windowWidth = 1280;
+const float FPS = 60.0;
+
+const int windowHeight = 720;
+const int windowWidth = 1280;
+
+const int playerBitmapSize = 50;
+
+
 
 struct sheep {
-	float x;
-	float y;
+	int x;
+	int y;
 	int hp;
 	int movementSpeed;
 	void(*playerDrawing)(struct point*);
-		void(*playerMovement)(struct sheep* , ALLEGRO_EVENT event, ALLEGRO_KEYBOARD_STATE keyboard);
+		void(*playerMovement)(struct point* player);
 };
 
 void nic() {
 
 }
 
-void playerDrawing(struct point* p) {  // test 
-	printf("dziala");		          //  funkcji
-}								     //	  struktury 
+void playerDrawing(struct point* p, int *x) {  // test 
+	printf("x %d \n",*x);		              //  funkcji
+}								             //	  struktury 
 							         
 void playerMovement(struct sheep *player, ALLEGRO_EVENT event,ALLEGRO_KEYBOARD_STATE keyboard) {
 	if (al_key_down(&keyboard, ALLEGRO_KEY_RIGHT)) player->x += player->movementSpeed;
 	if (al_key_down(&keyboard, ALLEGRO_KEY_LEFT))  player->x -= player->movementSpeed;
+
+	if (player->x >= windowWidth - playerBitmapSize) player->x = windowWidth - playerBitmapSize;
+	if (player->x <= 0) player->x =  0;
 }
 
 
@@ -41,7 +50,6 @@ int main(void)
 {	
 
 	struct sheep player = {windowWidth/2, windowHeight, 3, 5,playerDrawing}; // dziala jak konstruktor 
-	player.playerDrawing(&player);										    // test
 
 
 	ALLEGRO_DISPLAY *display;
@@ -49,13 +57,14 @@ int main(void)
 	ALLEGRO_TIMER *timer;
 	ALLEGRO_KEYBOARD_STATE keyboard;
 	ALLEGRO_BITMAP *kwadrat;  // ----- tmp player
+	
 
 	al_init();
 
 	display = al_create_display(windowWidth, windowHeight);
 	queue = al_create_event_queue();
-	timer = al_create_timer(1.0 / 60);
-	kwadrat = al_create_bitmap(50, 50);   // ----- tmp player
+	timer = al_create_timer(1.0 / FPS);
+	kwadrat = al_create_bitmap(playerBitmapSize, playerBitmapSize);   // ----- tmp player
 
 	al_clear_to_color(al_map_rgb(0, 0, 0));
 	
@@ -83,11 +92,14 @@ int main(void)
 		if (event.type == ALLEGRO_EVENT_TIMER) {
 			al_set_target_bitmap(al_get_backbuffer(display));
 			al_clear_to_color(al_map_rgba_f(255, 0, 0, 0)); // cos tu jest namieszane z R G B
-			al_draw_bitmap(kwadrat, player.x,player.y-50, 1); // ----- tmp Player
+			al_draw_bitmap(kwadrat, player.x,player.y - playerBitmapSize, 1); // ----- tmp Player
 
 			al_get_keyboard_state(&keyboard);
 
-			player.playerMovement(&player,event,&keyboard);   // movement test
+			player.playerDrawing(&player, &player.x);    // test: OK
+
+			//player.playerMovement(&player,event,keyboard);   // nie dziala 
+			playerMovement(&player, event, keyboard);      // dziala 
 			
 			
 			al_flip_display();
