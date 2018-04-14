@@ -19,7 +19,7 @@ struct sheep {
 	float y;
 	int hp;
 	float movementSpeed;
-	void(*playerDrawing)(struct point*);
+	void(*playerDrawing)(struct point* player);
 		void(*playerMovement)(struct point* player);
 };
 
@@ -27,9 +27,10 @@ void nic() {
 
 }
 
-void playerDrawing(struct sheep* p) {  // test 
-	printf("x %fl \n",p->x);		              //  funkcji
-}								             //	  struktury 
+void playerDrawing(struct sheep* player, ALLEGRO_BITMAP *kwadrat ) {
+	printf("x %fl \n",player->x);		
+			al_draw_bitmap(kwadrat, player->x,player->y - playerBitmapSize, 1); // ----- tmp Player
+}								     
 							         
 void playerMovement(struct sheep *player, ALLEGRO_EVENT event,ALLEGRO_KEYBOARD_STATE keyboard) {
 	if (al_key_down(&keyboard, ALLEGRO_KEY_RIGHT)) player->x += player->movementSpeed;
@@ -57,7 +58,7 @@ int main(void)
 	ALLEGRO_TIMER *timer;
 	ALLEGRO_KEYBOARD_STATE keyboard;
 	ALLEGRO_BITMAP *kwadrat;  // ----- tmp player
-	ALLEGRO_BITMAP *image = al_load_bitmap("dog.png");
+	ALLEGRO_BITMAP *playerCharacter = NULL;
 
 
 	al_init();
@@ -79,7 +80,7 @@ int main(void)
 
 	al_init_image_addon();
 	al_init_primitives_addon();
-
+	playerCharacter = al_load_bitmap("cat.png");
 
 	bool running = true;
 	
@@ -90,19 +91,17 @@ int main(void)
 		ALLEGRO_EVENT event;
 		al_wait_for_event(queue, &event);
 
-
 		closeOperation(event, &running);		
 		if (event.type == ALLEGRO_EVENT_TIMER) {
 
 			al_set_target_bitmap(al_get_backbuffer(display));
 			al_clear_to_color(al_map_rgba_f(255, 0, 0, 0)); // cos tu jest namieszane z R G B
 
-			al_draw_bitmap(kwadrat, player.x,player.y - playerBitmapSize, 1); // ----- tmp Player
-
 			al_get_keyboard_state(&keyboard);
 
-			player.playerDrawing(&player);    // test: OK
-			player.playerMovement(&player,event,keyboard);
+		//	player.playerDrawing(&player, kwadrat); 
+		//	player.playerMovement(&player,event,keyboard);
+			al_draw_bitmap(playerCharacter, 0, 0, NULL);
 		
 		
 			
@@ -114,7 +113,7 @@ int main(void)
 	al_uninstall_keyboard();
 	al_shutdown_image_addon();
 
-	al_destroy_bitmap(image);
+	al_destroy_bitmap(playerCharacter);
 		al_destroy_timer(timer);
 		al_destroy_bitmap(kwadrat);
 	return 0;
