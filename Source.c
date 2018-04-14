@@ -15,10 +15,10 @@ const int playerBitmapSize = 50;
 
 
 struct sheep {
-	int x;
-	int y;
+	float x;
+	float y;
 	int hp;
-	int movementSpeed;
+	float movementSpeed;
 	void(*playerDrawing)(struct point*);
 		void(*playerMovement)(struct point* player);
 };
@@ -27,8 +27,8 @@ void nic() {
 
 }
 
-void playerDrawing(struct point* p, int *x) {  // test 
-	printf("x %d \n",*x);		              //  funkcji
+void playerDrawing(struct sheep* p) {  // test 
+	printf("x %fl \n",p->x);		              //  funkcji
 }								             //	  struktury 
 							         
 void playerMovement(struct sheep *player, ALLEGRO_EVENT event,ALLEGRO_KEYBOARD_STATE keyboard) {
@@ -49,7 +49,7 @@ void closeOperation(ALLEGRO_EVENT event, bool *running) { // test przeslania eve
 int main(void)
 {	
 
-	struct sheep player = {windowWidth/2, windowHeight, 3, 5,playerDrawing}; // dziala jak konstruktor 
+	struct sheep player = {windowWidth/2, windowHeight, 3, 5.1,playerDrawing,playerMovement}; // dziala jak konstruktor 
 
 
 	ALLEGRO_DISPLAY *display;
@@ -57,7 +57,8 @@ int main(void)
 	ALLEGRO_TIMER *timer;
 	ALLEGRO_KEYBOARD_STATE keyboard;
 	ALLEGRO_BITMAP *kwadrat;  // ----- tmp player
-	
+	ALLEGRO_BITMAP *image = al_load_bitmap("dog.png");
+
 
 	al_init();
 
@@ -81,8 +82,10 @@ int main(void)
 
 
 	bool running = true;
-
+	
+		
 	al_start_timer(timer);
+
 	while (running) {
 		ALLEGRO_EVENT event;
 		al_wait_for_event(queue, &event);
@@ -90,17 +93,18 @@ int main(void)
 
 		closeOperation(event, &running);		
 		if (event.type == ALLEGRO_EVENT_TIMER) {
+
 			al_set_target_bitmap(al_get_backbuffer(display));
 			al_clear_to_color(al_map_rgba_f(255, 0, 0, 0)); // cos tu jest namieszane z R G B
+
 			al_draw_bitmap(kwadrat, player.x,player.y - playerBitmapSize, 1); // ----- tmp Player
 
 			al_get_keyboard_state(&keyboard);
 
-			player.playerDrawing(&player, &player.x);    // test: OK
-
-			//player.playerMovement(&player,event,keyboard);   // nie dziala 
-			playerMovement(&player, event, keyboard);      // dziala 
-			
+			player.playerDrawing(&player);    // test: OK
+			player.playerMovement(&player,event,keyboard);
+		
+		
 			
 			al_flip_display();
 		}
@@ -108,6 +112,9 @@ int main(void)
 
 	al_destroy_display(display);
 	al_uninstall_keyboard();
+	al_shutdown_image_addon();
+
+	al_destroy_bitmap(image);
 		al_destroy_timer(timer);
 		al_destroy_bitmap(kwadrat);
 	return 0;
