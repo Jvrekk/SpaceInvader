@@ -1,7 +1,8 @@
 ﻿  Source.c
-c:\users\user\source\repos\spaceinvaders0.1\source.c(104): warning C4133: 'function': incompatible types - from 'sheep *' to 'point *'
-c:\users\user\source\repos\spaceinvaders0.1\source.c(106): warning C4133: 'function': incompatible types - from 'sheep *' to 'point *'
-c:\users\user\source\repos\spaceinvaders0.1\source.c(106): warning C4020: 'player': too many actual parameters
-c:\users\user\source\repos\spaceinvaders0.1\source.c(52): warning C4028: formal parameter 1 different from declaration
-c:\users\user\source\repos\spaceinvaders0.1\source.c(52): warning C4113: 'void (__cdecl *)(sheep *,ALLEGRO_EVENT,ALLEGRO_KEYBOARD_STATE)' differs in parameter lists from 'void (__cdecl *)(point *)'
+c:\users\user\source\repos\spaceinvaders0.1\source.c(121): warning C4133: 'function': incompatible types - from 'sheep *' to 'point *'
+c:\users\user\source\repos\spaceinvaders0.1\source.c(122): warning C4133: 'function': incompatible types - from 'sheep *' to 'point *'
+c:\users\user\source\repos\spaceinvaders0.1\source.c(123): warning C4047: 'function': 'int' differs in levels of indirection from 'void *'
+c:\users\user\source\repos\spaceinvaders0.1\source.c(123): warning C4024: 'al_draw_bitmap': different types for formal and actual parameter 4
+c:\users\user\source\repos\spaceinvaders0.1\source.c(124): warning C4133: 'function': incompatible types - from 'sheep *' to 'point *'
+c:\users\user\source\repos\spaceinvaders0.1\source.c(60): warning C4028: formal parameter 1 different from declaration
   spaceInvaders0.1.vcxproj -> C:\Users\user\source\repos\spaceInvaders0.1\Debug\spaceInvaders0.1.exe

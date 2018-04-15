@@ -1,16 +1,16 @@
 #include <stdio.h>
 #include <allegro5/allegro.h>
-#include <allegro5\allegro_image.h>
+#include <allegro5/allegro_image.h>
 #include <allegro5\allegro_native_dialog.h>
 #include <allegro5/allegro_primitives.h> 
 #include <stdbool.h>
 
 const float FPS = 60.0;
 
-const int windowHeight = 720;
+ int windowHeight = 720;
 const int windowWidth = 1280;
 
-const int playerBitmapSize = 50;
+const int playerBitmapSize = 80;
 
 
 
@@ -19,13 +19,9 @@ struct sheep {
 	float y;
 	int hp;
 	float movementSpeed;
-	void(*playerDrawing)(struct point* player);
-		void(*playerMovement)(struct point* player);
+	void(*playerDrawing)(struct point* player, ALLEGRO_BITMAP *kwadrat);
+		void(*playerMovement)(struct point* player, ALLEGRO_EVENT event, ALLEGRO_KEYBOARD_STATE keyboard);
 };
-
-void nic() {
-
-}
 
 void playerDrawing(struct sheep* player, ALLEGRO_BITMAP *kwadrat ) {
 	printf("x %fl \n",player->x);		
@@ -37,9 +33,8 @@ void playerMovement(struct sheep *player, ALLEGRO_EVENT event,ALLEGRO_KEYBOARD_S
 	if (al_key_down(&keyboard, ALLEGRO_KEY_LEFT))  player->x -= player->movementSpeed;
 
 	if (player->x >= windowWidth - playerBitmapSize) player->x = windowWidth - playerBitmapSize;
-	if (player->x <= 0) player->x =  0;
+	if (player->x <= 0) player->x =  0;	
 }
-
 
 void closeOperation(ALLEGRO_EVENT event, bool *running) { // test przeslania eventu
 	if (event.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
@@ -50,7 +45,7 @@ void closeOperation(ALLEGRO_EVENT event, bool *running) { // test przeslania eve
 int main(void)
 {	
 
-	struct sheep player = {windowWidth/2, windowHeight, 3, 5.1,playerDrawing,playerMovement}; // dziala jak konstruktor 
+	struct sheep player = {windowWidth/2, windowHeight, 3, 5.1 ,playerDrawing,playerMovement}; // dziala jak konstruktor 
 
 
 	ALLEGRO_DISPLAY *display;
@@ -59,28 +54,37 @@ int main(void)
 	ALLEGRO_KEYBOARD_STATE keyboard;
 	ALLEGRO_BITMAP *kwadrat;  // ----- tmp player
 	ALLEGRO_BITMAP *playerCharacter = NULL;
+	
+	
 
 
 	al_init();
+	al_init_image_addon();
+	al_init_primitives_addon();
 
 	display = al_create_display(windowWidth, windowHeight);
 	queue = al_create_event_queue();
 	timer = al_create_timer(1.0 / FPS);
 	kwadrat = al_create_bitmap(playerBitmapSize, playerBitmapSize);   // ----- tmp player
+	
+
 
 	al_clear_to_color(al_map_rgb(0, 0, 0));
 	
 	al_set_target_bitmap(kwadrat);                 // ----- tmp player
 	al_clear_to_color(al_map_rgb(0, 255, 0));		// ----- tmp player
 
+	playerCharacter = al_load_bitmap("dbg.png");
+
 	al_install_keyboard();
 	al_register_event_source(queue, al_get_keyboard_event_source());
 	al_register_event_source(queue, al_get_display_event_source(display));
 	al_register_event_source(queue, al_get_timer_event_source(timer));
 
-	al_init_image_addon();
-	al_init_primitives_addon();
-	playerCharacter = al_load_bitmap("cat.png");
+	
+	if (playerCharacter == NULL) {
+		puts("blad ladowania zdj");
+	}
 
 	bool running = true;
 	
@@ -99,11 +103,9 @@ int main(void)
 
 			al_get_keyboard_state(&keyboard);
 
-		//	player.playerDrawing(&player, kwadrat); 
-		//	player.playerMovement(&player,event,keyboard);
-			al_draw_bitmap(playerCharacter, 0, 0, NULL);
-		
-		
+			player.playerDrawing(&player, kwadrat); 
+			player.playerMovement(&player,event,keyboard);
+			al_draw_bitmap(playerCharacter,player.x, player.y-200, NULL);
 			
 			al_flip_display();
 		}
@@ -112,7 +114,6 @@ int main(void)
 	al_destroy_display(display);
 	al_uninstall_keyboard();
 	al_shutdown_image_addon();
-
 	al_destroy_bitmap(playerCharacter);
 		al_destroy_timer(timer);
 		al_destroy_bitmap(kwadrat);
