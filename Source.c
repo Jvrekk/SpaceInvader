@@ -68,6 +68,7 @@ void enemyDrawing(struct enemyShip* enemy, ALLEGRO_BITMAP *kwadrat) {  // rysowa
 
 void enemyLogic(ALLEGRO_BITMAP *enemyCharacter,struct enemyShip* enemy) {  // rysowanie i poruszanie sie statku przeciwnika
 
+
 	bool right = false;
 	bool left  = false;
 	
@@ -128,8 +129,7 @@ int main(void)
 
 	struct sheep player = {windowWidth/2, windowHeight, 3, 20 , 5.1 ,playerDrawing,playerMovement}; // dziala jak konstruktor x,y,hp,ammo,speed
 	struct enemyShip enemy = { windowWidth / 2, 103, 3, 5.1 };
-	//struct bullet bullets[1000];
-	//bulletInit(&player, &bullets[1000]);
+
 
 	ALLEGRO_DISPLAY *display;
 	ALLEGRO_EVENT_QUEUE *queue;
@@ -202,8 +202,7 @@ int main(void)
 
 			al_set_target_bitmap(al_get_backbuffer(display));			
 			al_clear_to_color(al_map_rgb(27, 39, 53));					// tlo okna
-
-			al_draw_text(font18, al_map_rgb(255, 0, 255), windowWidth - 70, 0, 0, "LVL 0-1");// text ttf
+			al_draw_text(font18, al_map_rgb(255, 0, 255), windowWidth - 70, 0, 0, "LVL 0-1");// text poziom 
 
 			al_get_keyboard_state(&keyboard);			
 

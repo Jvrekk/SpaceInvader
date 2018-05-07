@@ -1,14 +1,14 @@
 ﻿  Source.c
 c:\users\user\source\repos\spaceinvaders0.1\source.c(7): warning C4067: unexpected tokens following preprocessor directive - expected a newline
-c:\users\user\source\repos\spaceinvaders0.1\source.c(90): warning C4047: 'function': 'int' differs in levels of indirection from 'void *'
-c:\users\user\source\repos\spaceinvaders0.1\source.c(90): warning C4024: 'al_draw_bitmap': different types for formal and actual parameter 4
-c:\users\user\source\repos\spaceinvaders0.1\source.c(93): warning C4047: 'function': 'int' differs in levels of indirection from 'void *'
-c:\users\user\source\repos\spaceinvaders0.1\source.c(93): warning C4024: 'al_draw_bitmap': different types for formal and actual parameter 4
+c:\users\user\source\repos\spaceinvaders0.1\source.c(91): warning C4047: 'function': 'int' differs in levels of indirection from 'void *'
+c:\users\user\source\repos\spaceinvaders0.1\source.c(91): warning C4024: 'al_draw_bitmap': different types for formal and actual parameter 4
+c:\users\user\source\repos\spaceinvaders0.1\source.c(94): warning C4047: 'function': 'int' differs in levels of indirection from 'void *'
+c:\users\user\source\repos\spaceinvaders0.1\source.c(94): warning C4024: 'al_draw_bitmap': different types for formal and actual parameter 4
+c:\users\user\source\repos\spaceinvaders0.1\source.c(216): warning C4133: 'function': incompatible types - from 'sheep *' to 'point *'
+c:\users\user\source\repos\spaceinvaders0.1\source.c(216): warning C4020: 'player': too many actual parameters
 c:\users\user\source\repos\spaceinvaders0.1\source.c(217): warning C4133: 'function': incompatible types - from 'sheep *' to 'point *'
-c:\users\user\source\repos\spaceinvaders0.1\source.c(217): warning C4020: 'player': too many actual parameters
-c:\users\user\source\repos\spaceinvaders0.1\source.c(218): warning C4133: 'function': incompatible types - from 'sheep *' to 'point *'
-c:\users\user\source\repos\spaceinvaders0.1\source.c(220): warning C4047: 'function': 'int' differs in levels of indirection from 'void *'
-c:\users\user\source\repos\spaceinvaders0.1\source.c(220): warning C4024: 'al_draw_bitmap': different types for formal and actual parameter 4
-c:\users\user\source\repos\spaceinvaders0.1\source.c(129): warning C4113: 'void (__cdecl *)(sheep *,ALLEGRO_BITMAP *,ALLEGRO_FONT *)' differs in parameter lists from 'void (__cdecl *)(point *,ALLEGRO_BITMAP *)'
-c:\users\user\source\repos\spaceinvaders0.1\source.c(129): warning C4028: formal parameter 1 different from declaration
+c:\users\user\source\repos\spaceinvaders0.1\source.c(219): warning C4047: 'function': 'int' differs in levels of indirection from 'void *'
+c:\users\user\source\repos\spaceinvaders0.1\source.c(219): warning C4024: 'al_draw_bitmap': different types for formal and actual parameter 4
+c:\users\user\source\repos\spaceinvaders0.1\source.c(130): warning C4113: 'void (__cdecl *)(sheep *,ALLEGRO_BITMAP *,ALLEGRO_FONT *)' differs in parameter lists from 'void (__cdecl *)(point *,ALLEGRO_BITMAP *)'
+c:\users\user\source\repos\spaceinvaders0.1\source.c(130): warning C4028: formal parameter 1 different from declaration
   spaceInvaders0.1.vcxproj -> C:\Users\user\source\repos\spaceInvaders0.1\Debug\spaceInvaders0.1.exe
