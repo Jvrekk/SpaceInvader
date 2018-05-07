@@ -4,7 +4,7 @@
 #include <allegro5/allegro_font.h>
 #include <allegro5\allegro_native_dialog.h>
 #include <allegro5/allegro_primitives.h> 
-#include <allegro5/allegro_ttf.h>/
+#include <allegro5/allegro_ttf.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <time.h>
@@ -23,9 +23,9 @@ struct sheep {
 	int hp;
 	int ammo;
 	float movementSpeed;
-	void(*playerDrawing)(struct point* player, ALLEGRO_BITMAP *kwadrat);
-		void(*playerMovement)(struct point* player, ALLEGRO_EVENT event, ALLEGRO_KEYBOARD_STATE keyboard);
-			void(*playerShooting)(struct point* player);
+	void(*playerDrawing)(struct sheep* player, ALLEGRO_BITMAP *kwadrat, ALLEGRO_FONT *font18);
+		void(*playerMovement)(struct sheep* player, ALLEGRO_EVENT event, ALLEGRO_KEYBOARD_STATE keyboard);
+			void(*playerShooting)(struct sheep* player);
 };
 
 struct enemyShip {
@@ -88,10 +88,10 @@ void enemyLogic(ALLEGRO_BITMAP *enemyCharacter,struct enemyShip* enemy) {  // ry
 		}
 
 		if (right == true) {
-			al_draw_bitmap(enemyCharacter, enemy->x += 3.1, enemy->y - 103, NULL);
+			al_draw_bitmap(enemyCharacter, enemy->x += 3, enemy->y - 103, 0);
 		}
 		else {
-			al_draw_bitmap(enemyCharacter, enemy->x -= 3.1, enemy->y - 103, NULL);
+			al_draw_bitmap(enemyCharacter, enemy->x -= 3, enemy->y - 103, 0);
 		}
 	}
 
@@ -183,10 +183,9 @@ int main(void)
 	al_register_event_source(queue, al_get_timer_event_source(timer));
 
 	
-	if (playerCharacter == NULL || enemyCharacter == NULL ) {
-		puts("blad ladowania zdj ");
-	}
-
+	if (playerCharacter == NULL )	puts("blad ladowania zdj player");
+	if (font18 == NULL) puts("nie wczytano czcionki");
+	if (enemyCharacter == NULL) puts("blad ladowania zdj enemy ");
 	bool running = true;
 	
 		
@@ -216,7 +215,7 @@ int main(void)
 			player.playerDrawing(&player, kwadrat, font18);
 			player.playerMovement(&player, event, keyboard);
 			playerShooting(&player, event, keyboard);
-			al_draw_bitmap(playerCharacter, player.x, player.y - 130, NULL); 
+			al_draw_bitmap(playerCharacter, player.x, player.y - 130, 0); 
 
 			
 
