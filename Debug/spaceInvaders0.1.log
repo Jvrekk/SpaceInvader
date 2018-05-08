@@ -1,2 +1,4 @@
 ﻿  Source.c
+c:\users\user\source\repos\spaceinvaders0.1\source.c(98): warning C4047: 'function': 'sheep *' differs in levels of indirection from 'sheep **'
+c:\users\user\source\repos\spaceinvaders0.1\source.c(98): warning C4024: 'colision': different types for formal and actual parameter 3
   spaceInvaders0.1.vcxproj -> C:\Users\user\source\repos\spaceInvaders0.1\Debug\spaceInvaders0.1.exe

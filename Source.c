@@ -16,6 +16,9 @@ const int windowWidth = 1280;
 
 const int playerBitmapSize = 80;
 
+float missley = 0;
+float misslex = 1280 / 2;
+
 
 struct sheep {
 	float x;
@@ -33,9 +36,9 @@ struct enemyShip {
 	float y;
 	int hp;
 	float movementSpeed;
-	void(*enemyDrawing)(struct point* player, ALLEGRO_BITMAP *kwadrat);
-		void(*playerMovement)(struct point* player, ALLEGRO_EVENT event, ALLEGRO_KEYBOARD_STATE keyboard);
-			void(*playerShooting)(struct point* player);
+	void(*enemyDrawing)(struct enemyShip* player, ALLEGRO_BITMAP *kwadrat);
+		void(*playerMovement)(struct enemyShip* player, ALLEGRO_EVENT event, ALLEGRO_KEYBOARD_STATE keyboard);
+			void(*playerShooting)(struct enemyShip* player);
 };
 
 void playerShooting(struct sheep* player, ALLEGRO_EVENT event, ALLEGRO_KEYBOARD_STATE keyboard) {
@@ -50,7 +53,7 @@ void playerShooting(struct sheep* player, ALLEGRO_EVENT event, ALLEGRO_KEYBOARD_
 }
 
 void playerDrawing(struct sheep* player, ALLEGRO_BITMAP *kwadrat , ALLEGRO_FONT *font18) {  // rysowanie bitmapy pod playera 
-	                                                                                       //	printf("x %fl \n",player->x);		
+	                                                                                       	printf("x %fl \n",player->x);		
 			al_draw_bitmap(kwadrat, player->x,player->y - playerBitmapSize, 1); 
 			al_draw_textf(font18, al_map_rgb(255, 0, 255), windowWidth - 120, 20, 0,"Player HP: %d", player->hp);	//  wypisanie hp 
 }
@@ -63,19 +66,36 @@ void enemyDrawing(struct enemyShip* enemy, ALLEGRO_BITMAP *kwadrat) {  // rysowa
 	al_draw_bitmap(kwadrat, enemy->x, enemy->y - playerBitmapSize, 1);
 }
 
+bool colision(float mX, float mY , struct sheep *player) {
+	// nie moge ogarnac
+	if(mX >= player->x)
+	return true;
+	else {
+		return false;
+	}
+}
 
-
-
-void enemyLogic(ALLEGRO_BITMAP *enemyCharacter,struct enemyShip* enemy) {  // rysowanie i poruszanie sie statku przeciwnika
-
+void enemyLogic(ALLEGRO_BITMAP *enemyCharacter,struct enemyShip* enemy, struct sheep *player, ALLEGRO_BITMAP *missle) {  // rysowanie i poruszanie sie statku przeciwnika
+	
 
 	bool right = false;
-	bool left  = false;
-	
+	bool left  = false;				
+	bool boolColision = false;
 	float moveTO = rand() % windowWidth;
-																		//	printf("%f , m1 = \n", moveTO);  losowana wart x
+																//	printf("%f , m1 = \n", moveTO);  losowana wart x
+	
+	
 
+	
 	if (enemy->hp > 0) {
+
+		
+		al_draw_bitmap(missle,misslex, missley+=5.1, 0);
+		if (missley >= windowHeight || boolColision) {  
+			missley = 0;
+			misslex = enemy->x + 30;
+		}
+		boolColision = colision(misslex, missley, &player);
 
 		if (moveTO >= enemy->x) {
 			right = true;
@@ -93,6 +113,7 @@ void enemyLogic(ALLEGRO_BITMAP *enemyCharacter,struct enemyShip* enemy) {  // ry
 		else {
 			al_draw_bitmap(enemyCharacter, enemy->x -= 3, enemy->y - 103, 0);
 		}
+
 	}
 
 }
@@ -122,14 +143,13 @@ void gwazdki(int ilosc) {
 }
 
 
-
 int main(void)
 {	
 	srand(time(NULL));
 
 	struct sheep player = {windowWidth/2, windowHeight, 3, 20 , 5.1 ,playerDrawing,playerMovement}; // dziala jak konstruktor x,y,hp,ammo,speed
 	struct enemyShip enemy = { windowWidth / 2, 103, 3, 5.1 };
-
+	struct enemyShip enemy2 = { windowWidth / 2, 103, 3, 5.1 };
 
 	ALLEGRO_DISPLAY *display;
 	ALLEGRO_EVENT_QUEUE *queue;
@@ -141,6 +161,7 @@ int main(void)
 	
 	ALLEGRO_BITMAP *playerCharacter = NULL;
 	ALLEGRO_BITMAP *enemyCharacter= NULL; 
+	ALLEGRO_BITMAP *missle= NULL; 
 	
 	
 
@@ -176,6 +197,7 @@ int main(void)
 
 	playerCharacter = al_load_bitmap("dbg.png");
 	enemyCharacter = al_load_bitmap("enemy.png");
+	missle = al_load_bitmap("missle.png");
 
 	al_install_keyboard();
 	al_register_event_source(queue, al_get_keyboard_event_source());
@@ -210,7 +232,8 @@ int main(void)
 
 			
 			enemyDrawing(&enemy, kwadratPodEnemy);
-			enemyLogic(enemyCharacter,&enemy);
+			enemyLogic(enemyCharacter, &enemy,&player, missle);
+			enemyLogic(enemyCharacter,&enemy2,&player,missle);
 
 			player.playerDrawing(&player, kwadrat, font18);
 			player.playerMovement(&player, event, keyboard);
@@ -218,14 +241,16 @@ int main(void)
 			al_draw_bitmap(playerCharacter, player.x, player.y - 130, 0); 
 
 			
-
 			al_flip_display();
 		}
 	}
+	
 	al_destroy_display(display);
 	al_uninstall_keyboard();
 	al_shutdown_image_addon();
 	al_destroy_bitmap(playerCharacter);
+	al_destroy_bitmap(missle);
+	al_destroy_bitmap(enemyCharacter);
 		al_destroy_timer(timer);
 		al_destroy_bitmap(kwadrat);
 	return 0;
