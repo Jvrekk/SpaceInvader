@@ -3,6 +3,8 @@
 #include <allegro5/allegro_image.h>
 #include <allegro5/allegro_font.h>
 #include <allegro5\allegro_native_dialog.h>
+#include <allegro5\allegro_audio.h>
+#include <allegro5\allegro_acodec.h>
 #include <allegro5/allegro_primitives.h> 
 #include <allegro5/allegro_ttf.h>
 #include <stdbool.h>
@@ -239,8 +241,6 @@ int main(void)
 	ALLEGRO_EVENT_QUEUE *queue;
 	ALLEGRO_TIMER *timer;
 	ALLEGRO_KEYBOARD_STATE keyboard;
-	
-
 	ALLEGRO_BITMAP *playerCharacter = NULL;
 	ALLEGRO_BITMAP *enemyCharacter = NULL; 
 	ALLEGRO_BITMAP *missle= NULL; 
@@ -254,6 +254,9 @@ int main(void)
 	al_init_primitives_addon();
 	al_init_font_addon();
 	al_init_ttf_addon();	
+	al_init_acodec_addon();
+
+	//al_reserve_samples(1);
 
 	ALLEGRO_FONT *font18 = al_load_font("arial.ttf", 18, 0);  // wczytanie fonta , size , flags 	
 	ALLEGRO_FONT *font24 = al_load_font("arial.ttf", 24, 0);  // wczytanie fonta , size , flags 	
@@ -274,9 +277,22 @@ int main(void)
 	missle = al_load_bitmap("missle.png");
 
 	al_install_keyboard();
+	al_install_audio();
 	al_register_event_source(queue, al_get_keyboard_event_source());
 	al_register_event_source(queue, al_get_display_event_source(display));
 	al_register_event_source(queue, al_get_timer_event_source(timer));
+
+
+	al_reserve_samples(1);
+	ALLEGRO_SAMPLE *backgroundSong = al_load_sample("backgroundSong.ogg");
+	ALLEGRO_SAMPLE_INSTANCE *songInstance = al_create_sample_instance(backgroundSong);
+	al_set_sample_instance_playmode(songInstance, ALLEGRO_PLAYMODE_LOOP);
+	al_attach_sample_instance_to_mixer(songInstance, al_get_default_mixer());
+	if (backgroundSong == NULL ) {
+		puts("blad ladowania sample");
+	}	if (songInstance == NULL ) {
+		puts("blad ladowania istance");
+	}
 
 	
 	if (playerCharacter == NULL )	puts("blad ladowania zdj player");
@@ -284,6 +300,7 @@ int main(void)
 	if (font24 == NULL) puts("nie wczytano czcionki");
 	if (enemyCharacter == NULL) puts("blad ladowania zdj enemy ");
 	
+	al_play_sample_instance(songInstance);
 
 	al_start_timer(timer);
 	
@@ -405,6 +422,8 @@ int main(void)
 	al_destroy_display(display);
 	al_uninstall_keyboard();
 	al_shutdown_image_addon();
+	al_destroy_sample(backgroundSong);
+	al_destroy_sample_instance(songInstance);
 	al_destroy_bitmap(playerCharacter);
 	al_destroy_bitmap(missle);
 	al_destroy_bitmap(enemyCharacter);
