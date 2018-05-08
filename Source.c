@@ -51,6 +51,12 @@ struct enemyShip {
 	float movementSpeed;
 };
 
+struct enemyMissle {
+	float x;
+	float y;
+	float movementSpeed;
+};
+
 
 void playerShooting(struct sheep* player, ALLEGRO_EVENT event, ALLEGRO_KEYBOARD_STATE keyboard) {
 	
@@ -129,23 +135,27 @@ void gwazdki(int ilosc) {
 	}
 }
 
-void menuButtons(ALLEGRO_KEYBOARD_STATE keyboard) {
-	al_draw_filled_rectangle(windowWidth / 2 - 100, 100, windowWidth / 2 + 100, 200, al_map_rgba(0, 0, 0, 255));
-	al_draw_filled_rectangle(windowWidth / 2 - 100, 300, windowWidth / 2 + 100, 400, al_map_rgba(0, 0, 0, 255));
-	al_draw_filled_rectangle(windowWidth / 2 - 100, 500, windowWidth / 2 + 100, 600, al_map_rgba(0, 0, 0, 255));
+void menuButtons(ALLEGRO_FONT *font48, ALLEGRO_KEYBOARD_STATE keyboard) {
+	al_draw_filled_rectangle(windowWidth / 2 - 150, 250, windowWidth / 2 + 150, 350, al_map_rgba(51, 75, 102, 255));
+	al_draw_filled_rectangle(windowWidth / 2 - 150, 450, windowWidth / 2 + 150, 550, al_map_rgba(51, 75, 102, 255));
+	al_draw_filled_rectangle(windowWidth / 2 - 150, 650, windowWidth / 2 + 150, 750, al_map_rgba(51, 75, 102, 255));
 	gwazdki(100);
 	if (wybor == 0) {
-		al_draw_filled_rectangle(windowWidth / 2 - 100, 100, windowWidth / 2 + 100, 200, al_map_rgba(255, 0, 0, 255));
+		al_draw_filled_rectangle(windowWidth / 2 - 150, 250, windowWidth / 2 + 150, 350, al_map_rgba(85, 125, 170, 255));
 
 	}
 	if (wybor == 1) {
-		al_draw_filled_rectangle(windowWidth / 2 - 100, 300, windowWidth / 2 + 100, 400, al_map_rgba(255, 0, 0, 255));
+		al_draw_filled_rectangle(windowWidth / 2 - 150, 450, windowWidth / 2 + 150, 550, al_map_rgba(85, 125, 170, 255));
 
 	}
 	if (wybor == 2) {
-		al_draw_filled_rectangle(windowWidth / 2 - 100, 500, windowWidth / 2 + 100, 600, al_map_rgba(255, 0, 0, 255));
+		al_draw_filled_rectangle(windowWidth / 2 - 150, 650, windowWidth / 2 + 150, 750, al_map_rgba(85, 125, 170, 255));
 
 	}
+	al_draw_textf(font48, al_map_rgb(255, 215, 0), windowWidth / 2 - 125, 280, 0, "Rozpocznij Gre");
+	al_draw_textf(font48, al_map_rgb(255, 215, 0), windowWidth / 2 - 100, 480, 0, "Zmien statek");
+	al_draw_textf(font48, al_map_rgb(255, 215, 0), windowWidth / 2 -55, 680, 0, "Koniec");
+
 	if (al_key_down(&keyboard, ALLEGRO_KEY_ENTER)) {
 		if (wybor == 0) {
 			game = true;
@@ -205,10 +215,10 @@ void shipChooseButtonsDrawing() {
 }
 void shipChooseDrawStats(ALLEGRO_FONT *font24, struct sheep *player) {
 	
-	al_draw_textf(font24, al_map_rgb(255, 215, 0), 900, windowHeight - 420, 0, "HP %d", player->hp);
-	al_draw_textf(font24, al_map_rgb(255, 215, 0), 900, windowHeight - 400, 0, "AD %d", player->dmg);
-	al_draw_textf(font24, al_map_rgb(255, 215, 0), 900, windowHeight - 380, 0, "AMMO %d", player->ammo);
-	al_draw_textf(font24, al_map_rgb(255, 215, 0), 900, windowHeight - 360, 0, "MS %3f", player->movementSpeed);
+	al_draw_textf(font24, al_map_rgb(255, 215, 0), 560, windowHeight - 320, 0, "HP %d", player->hp);
+	al_draw_textf(font24, al_map_rgb(255, 215, 0), 560, windowHeight - 300, 0, "AD %d", player->dmg);
+	al_draw_textf(font24, al_map_rgb(255, 215, 0), 560, windowHeight - 280, 0, "AMMO %d", player->ammo);
+	al_draw_textf(font24, al_map_rgb(255, 215, 0), 560, windowHeight - 260, 0, "MS %3f", player->movementSpeed);
 
 }
 int main(void)
@@ -247,6 +257,7 @@ int main(void)
 
 	ALLEGRO_FONT *font18 = al_load_font("arial.ttf", 18, 0);  // wczytanie fonta , size , flags 	
 	ALLEGRO_FONT *font24 = al_load_font("arial.ttf", 24, 0);  // wczytanie fonta , size , flags 	
+	ALLEGRO_FONT *font48 = al_load_font("arial.ttf", 36, 0);  // wczytanie fonta , size , flags 	
 	
 
 	display = al_create_display(windowWidth, windowHeight);
@@ -259,7 +270,7 @@ int main(void)
 
 
 	playerCharacter = al_load_bitmap("ship1.png");
-	enemyCharacter = al_load_bitmap("enemy.png");
+	enemyCharacter = al_load_bitmap("ufo.png");
 	missle = al_load_bitmap("missle.png");
 
 	al_install_keyboard();
@@ -270,6 +281,7 @@ int main(void)
 	
 	if (playerCharacter == NULL )	puts("blad ladowania zdj player");
 	if (font18 == NULL) puts("nie wczytano czcionki");
+	if (font24 == NULL) puts("nie wczytano czcionki");
 	if (enemyCharacter == NULL) puts("blad ladowania zdj enemy ");
 	
 
@@ -293,7 +305,7 @@ int main(void)
 
 				al_get_keyboard_state(&keyboard);
 
-				menuButtons(keyboard);
+				menuButtons(font48, keyboard);
 
 				al_flip_display();
 		}
@@ -342,7 +354,6 @@ int main(void)
 				if (al_key_down(&keyboard, ALLEGRO_KEY_ESCAPE)) {
 					menuRun = true;
 					shipChoose = false;
-
 				};
 				if (al_key_down(&keyboard, ALLEGRO_KEY_1)) {
 					wybor = 0;
