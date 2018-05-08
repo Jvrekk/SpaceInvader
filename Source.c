@@ -11,7 +11,7 @@
 
 const float FPS = 60.0;
 
-const int windowHeight = 720;
+const int windowHeight = 1024;
 const int windowWidth = 1280;
 
 const int playerBitmapSize = 80;
@@ -19,12 +19,19 @@ const int playerBitmapSize = 80;
 float missley = 0;
 float misslex = 1280 / 2;
 
-int wybor = 0;
+int wybor = -1;
+
+void delay(int mseconds) {
+	clock_t goal = mseconds + clock();
+	while (goal > clock());
+}
+
 struct sheep {
 	float x;
 	float y;
 	int hp;
 	int ammo;
+	int dmg;
 	float movementSpeed;
 		void(*playerMovement)(struct sheep* player, ALLEGRO_EVENT event, ALLEGRO_KEYBOARD_STATE keyboard);
 			void(*playerShooting)(struct sheep* player);
@@ -126,7 +133,7 @@ int main(void)
 {	
 	srand(time(NULL));
 
-	struct sheep player = {windowWidth/2, windowHeight, 3, 20 , 5.1,playerMovement}; // dziala jak konstruktor x,y,hp,ammo,speed
+	struct sheep player = {windowWidth/2, windowHeight, 3, 20 , 5.1,5,playerMovement}; // dziala jak konstruktor x,y,hp,ammo,dmg,speed
 	struct enemyShip enemy = { windowWidth / 2, 103, 3, 5.1 };
 	struct enemyShip enemy2 = { windowWidth / 2, 103, 3, 5.1 };
 
@@ -174,7 +181,7 @@ int main(void)
 
 
 
-	playerCharacter = al_load_bitmap("dbg.png");
+	playerCharacter = al_load_bitmap("ship3.png");
 	enemyCharacter = al_load_bitmap("enemy.png");
 	missle = al_load_bitmap("missle.png");
 
@@ -192,6 +199,7 @@ int main(void)
 	bool running = true;
 	bool game = false;
 	bool menuRun = true;
+	bool shipChoose = false;
 
 	al_start_timer(timer);
 	
@@ -200,54 +208,61 @@ int main(void)
 		al_wait_for_event(queue, &event);
 
 		if (menuRun) {
-			
+
 			
 			
 			if (event.type == ALLEGRO_EVENT_TIMER) {
-
-
+				double czas = al_get_time(); 
+				
 				al_set_target_bitmap(al_get_backbuffer(display));
 				al_clear_to_color(al_map_rgb(27, 39, 53));					// tlo okna
-				al_draw_text(font18, al_map_rgb(255, 0, 255), windowWidth - 70, 0, 0, "LVL 0-1");// text poziom
+				al_draw_textf(font18, al_map_rgb(255, 0, 255), windowWidth - 120, 0, 0, "Time: %f",czas);// text poziom
 
 				al_get_keyboard_state(&keyboard);
 				al_draw_filled_rectangle(windowWidth / 2 - 100, 100, windowWidth / 2 + 100, 200, al_map_rgba(0, 0, 0, 255));
 				al_draw_filled_rectangle(windowWidth / 2 - 100, 300, windowWidth / 2 + 100, 400, al_map_rgba(0, 0, 0, 255));
 				al_draw_filled_rectangle(windowWidth / 2 - 100, 500, windowWidth / 2 + 100, 600, al_map_rgba(0, 0, 0, 255));
-
 				gwazdki(100);
 				if (wybor == 0) {
 					al_draw_filled_rectangle(windowWidth / 2 - 100, 100, windowWidth / 2 + 100, 200, al_map_rgba(255, 0, 0, 255));
-					
+				
 				}
 				if (wybor == 1) {
-					
 					al_draw_filled_rectangle(windowWidth / 2 - 100, 300, windowWidth / 2 + 100, 400, al_map_rgba(255, 0, 0, 255));
 					
 				}
 				if (wybor == 2) {
-					
 					al_draw_filled_rectangle(windowWidth / 2 - 100, 500, windowWidth / 2 + 100, 600, al_map_rgba(255, 0, 0, 255));
+					
 				}
 
 
 
-				if (al_key_down(&keyboard, ALLEGRO_KEY_LEFT)) {
-					game = true;
-					menuRun = false;
-				};
-				if (al_key_down(&keyboard, ALLEGRO_KEY_UP)) {
-					wybor--;
-					if (wybor < 0) {
-						wybor = 0;
+				if (al_key_down(&keyboard, ALLEGRO_KEY_ENTER)) {
+					if (wybor == 0) {
+						game = true;
+						menuRun = false;
 					}
-				};
-				if (al_key_down(&keyboard, ALLEGRO_KEY_DOWN)) {
-					wybor++;
-					if (wybor > 2) {
-						wybor = 2;
+					if (wybor == 1) {
+						shipChoose = true;
+						menuRun = false;
 					}
+					if (wybor == 2) {
+						running = false;
+					}
+
+					
 				};
+				if (al_key_down(&keyboard, ALLEGRO_KEY_1)) {
+					wybor = 0;
+				};
+				if (al_key_down(&keyboard, ALLEGRO_KEY_2)) {
+					wybor = 1;
+				};
+				if (al_key_down(&keyboard, ALLEGRO_KEY_3)) {
+					wybor = 2;
+				};
+		
 
 
 
@@ -255,6 +270,73 @@ int main(void)
 			}
 
 		}
+
+		if (shipChoose) {
+			if (event.type == ALLEGRO_EVENT_TIMER) {
+				double czas = al_get_time();
+
+				al_set_target_bitmap(al_get_backbuffer(display));
+				al_clear_to_color(al_map_rgb(27, 39, 53));					// tlo okna
+				al_draw_textf(font18, al_map_rgb(255, 0, 255), windowWidth - 120, 0, 0, "Time: %f", czas);// text poziom
+
+				al_get_keyboard_state(&keyboard);
+				al_draw_filled_rectangle(windowWidth / 2 - 550  , 300 , windowWidth / 2 -250  , 600, al_map_rgba(0, 0, 0, 255));
+				al_draw_filled_rectangle(windowWidth / 2 - 150  , 300 , windowWidth / 2 + 150   , 600, al_map_rgba(0, 0, 0, 255));
+				al_draw_filled_rectangle(windowWidth / 2 + 250  , 300 , windowWidth / 2 + 550  , 600, al_map_rgba(0, 0, 0, 255));
+				gwazdki(100);
+				if (wybor == 0) {
+					al_draw_filled_rectangle(windowWidth / 2 - 550, 300, windowWidth / 2 - 250, 600, al_map_rgba(0, 255, 0, 255));
+					player.hp = 250;
+					player.movementSpeed = 5.1;
+					player.dmg = 25;
+					player.ammo = 1000;
+					al_destroy_bitmap(playerCharacter);
+					playerCharacter = al_load_bitmap("ship1.png");
+					
+				}
+				if (wybor == 1) {
+					al_draw_filled_rectangle(windowWidth / 2 - 150, 300, windowWidth / 2 + 150, 600, al_map_rgba(0, 255, 0, 255));
+					player.hp = 500;
+					player.movementSpeed = 3.1;
+					player.dmg = 40;
+					player.ammo = 100;
+					al_destroy_bitmap(playerCharacter);
+					playerCharacter = al_load_bitmap("ship2.png");
+				}
+				if (wybor == 2) {
+					al_draw_filled_rectangle(windowWidth / 2 + 250, 300, windowWidth / 2 + 550, 600, al_map_rgba(0, 255, 0, 255));
+					player.hp = 5000;
+					player.movementSpeed = 1.1;
+					player.dmg = 250;
+					player.ammo = 10;
+					al_destroy_bitmap(playerCharacter);
+					playerCharacter = al_load_bitmap("ship3.png");
+				}
+
+
+
+				if (al_key_down(&keyboard, ALLEGRO_KEY_ESCAPE)) {
+					menuRun = true;
+					shipChoose = false;
+
+				};
+				if (al_key_down(&keyboard, ALLEGRO_KEY_1)) {
+					wybor = 0;
+				};
+				if (al_key_down(&keyboard, ALLEGRO_KEY_2)) {
+					wybor = 1;
+				};
+				if (al_key_down(&keyboard, ALLEGRO_KEY_3)) {
+					wybor = 2;
+				};
+
+
+
+
+				al_flip_display();
+			}
+		}
+
 		if(game){
 			
 					
@@ -280,6 +362,11 @@ int main(void)
 				al_draw_bitmap(playerCharacter, player.x, player.y - 130, 0); 
 
 			
+				if (al_key_down(&keyboard, ALLEGRO_KEY_ESCAPE)) {
+					game = false;
+					menuRun = true;
+
+				};
 				al_flip_display();
 			}
 			closeOperation(event, &running);
