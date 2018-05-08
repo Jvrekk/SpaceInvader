@@ -42,9 +42,8 @@ struct enemyShip {
 	float y;
 	int hp;
 	float movementSpeed;
-		void(*playerMovement)(struct enemyShip* player, ALLEGRO_EVENT event, ALLEGRO_KEYBOARD_STATE keyboard);
-			void(*playerShooting)(struct enemyShip* player);
 };
+
 
 void playerShooting(struct sheep* player, ALLEGRO_EVENT event, ALLEGRO_KEYBOARD_STATE keyboard) {
 	
@@ -66,7 +65,7 @@ void enemyLogic(ALLEGRO_BITMAP *enemyCharacter,struct enemyShip* enemy, struct s
 	bool left  = false;				
 	
 	float moveTO = rand() % windowWidth;
-																//	printf("%f , m1 = \n", moveTO);  losowana wart x
+															//printf("%f , m1 = \n", moveTO);
 	
 	
 
@@ -74,7 +73,7 @@ void enemyLogic(ALLEGRO_BITMAP *enemyCharacter,struct enemyShip* enemy, struct s
 	if (enemy->hp > 0) {
 
 		
-		al_draw_bitmap(missle,misslex, missley+=5.1, 0);
+		al_draw_bitmap(missle,misslex, missley+=1, 0);
 		if (missley >= windowHeight) {  
 			missley = 0;
 			misslex = enemy->x + 30;
@@ -134,19 +133,27 @@ int main(void)
 	srand(time(NULL));
 
 	struct sheep player = {windowWidth/2, windowHeight, 3, 20 , 5.1,5,playerMovement}; // dziala jak konstruktor x,y,hp,ammo,dmg,speed
-	struct enemyShip enemy = { windowWidth / 2, 103, 3, 5.1 };
-	struct enemyShip enemy2 = { windowWidth / 2, 103, 3, 5.1 };
+	struct enemyShip enemy[10];
+
+	for (int i = 0; i < 10; i++) {
+		enemy[i].x = 20;
+		enemy[i].y = 103;
+		enemy[i].hp = 20;
+		enemy[i].movementSpeed = 3.1;
+	}
+
+
+	
+
+
 
 	ALLEGRO_DISPLAY *display;
 	ALLEGRO_EVENT_QUEUE *queue;
 	ALLEGRO_TIMER *timer;
 	ALLEGRO_KEYBOARD_STATE keyboard;
-	ALLEGRO_BITMAP *kwadrat;  // ----- tmp player
-	ALLEGRO_BITMAP *kwadratPodEnemy;  // ----- tmp enem
-
 	
 	ALLEGRO_BITMAP *playerCharacter = NULL;
-	ALLEGRO_BITMAP *enemyCharacter= NULL; 
+	ALLEGRO_BITMAP *enemyCharacter = NULL; 
 	ALLEGRO_BITMAP *missle= NULL; 
 	
 	
@@ -164,21 +171,11 @@ int main(void)
 	display = al_create_display(windowWidth, windowHeight);
 	queue = al_create_event_queue();
 	timer = al_create_timer(1.0 / FPS);
-	kwadrat = al_create_bitmap(playerBitmapSize, playerBitmapSize);   // ----- tmp player
-
-
-	kwadratPodEnemy = al_create_bitmap(playerBitmapSize, playerBitmapSize);   // ----- tmp enemy
 	
 
 
 	al_clear_to_color(al_map_rgb(0, 0, 0));
 	
-	al_set_target_bitmap(kwadrat);                 // ----- tmp player
-	al_clear_to_color(al_map_rgb(0, 255, 0));	  // ----- tmp player
-
-	al_set_target_bitmap(kwadratPodEnemy);           // ----- tmp enemy
-	al_clear_to_color(al_map_rgb(0, 255, 0));		// ----- tmp enemy
-
 
 
 	playerCharacter = al_load_bitmap("ship3.png");
@@ -353,10 +350,9 @@ int main(void)
 				gwazdki(100);
 
 
-			
-				enemyLogic(enemyCharacter, &enemy,&player, missle);
-				enemyLogic(enemyCharacter,&enemy2,&player,missle);
-
+				for(int i = 0; i <10;i++)
+					enemyLogic(enemyCharacter, &enemy[i],&player, missle);
+				
 				player.playerMovement(&player, event, keyboard);
 				playerShooting(&player, event, keyboard);
 				al_draw_bitmap(playerCharacter, player.x, player.y - 130, 0); 
@@ -380,6 +376,6 @@ int main(void)
 	al_destroy_bitmap(missle);
 	al_destroy_bitmap(enemyCharacter);
 		al_destroy_timer(timer);
-		al_destroy_bitmap(kwadrat);
+	
 	return 0;
 }
