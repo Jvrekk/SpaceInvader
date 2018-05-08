@@ -21,6 +21,13 @@ float misslex = 1280 / 2;
 
 int wybor = -1;
 
+
+bool running = true;
+bool game = false;
+bool menuRun = true;
+bool shipChoose = false;
+
+
 void delay(int mseconds) {
 	clock_t goal = mseconds + clock();
 	while (goal > clock());
@@ -66,10 +73,7 @@ void enemyLogic(ALLEGRO_BITMAP *enemyCharacter,struct enemyShip* enemy, struct s
 	
 	float moveTO = rand() % windowWidth;
 															//printf("%f , m1 = \n", moveTO);
-	
-	
 
-	
 	if (enemy->hp > 0) {
 
 		
@@ -125,9 +129,86 @@ void gwazdki(int ilosc) {
 	}
 }
 
+void menuButtons(ALLEGRO_KEYBOARD_STATE keyboard) {
+	al_draw_filled_rectangle(windowWidth / 2 - 100, 100, windowWidth / 2 + 100, 200, al_map_rgba(0, 0, 0, 255));
+	al_draw_filled_rectangle(windowWidth / 2 - 100, 300, windowWidth / 2 + 100, 400, al_map_rgba(0, 0, 0, 255));
+	al_draw_filled_rectangle(windowWidth / 2 - 100, 500, windowWidth / 2 + 100, 600, al_map_rgba(0, 0, 0, 255));
+	gwazdki(100);
+	if (wybor == 0) {
+		al_draw_filled_rectangle(windowWidth / 2 - 100, 100, windowWidth / 2 + 100, 200, al_map_rgba(255, 0, 0, 255));
+
+	}
+	if (wybor == 1) {
+		al_draw_filled_rectangle(windowWidth / 2 - 100, 300, windowWidth / 2 + 100, 400, al_map_rgba(255, 0, 0, 255));
+
+	}
+	if (wybor == 2) {
+		al_draw_filled_rectangle(windowWidth / 2 - 100, 500, windowWidth / 2 + 100, 600, al_map_rgba(255, 0, 0, 255));
+
+	}
+	if (al_key_down(&keyboard, ALLEGRO_KEY_ENTER)) {
+		if (wybor == 0) {
+			game = true;
+			menuRun = false;
+		}
+		if (wybor == 1) {
+			shipChoose = true;
+			menuRun = false;
+		}
+		if (wybor == 2) {
+			running = false;
+		}
 
 
+	};
+	if (al_key_down(&keyboard, ALLEGRO_KEY_1)) {
+		wybor = 0;
+	};
+	if (al_key_down(&keyboard, ALLEGRO_KEY_2)) {
+		wybor = 1;
+	};
+	if (al_key_down(&keyboard, ALLEGRO_KEY_3)) {
+		wybor = 2;
+	};
+}
 
+void shipChooseButtonsDrawing() {
+
+	ALLEGRO_BITMAP *ship1 = al_load_bitmap("ship1Large.png");
+	ALLEGRO_BITMAP *ship2 = al_load_bitmap("ship2Large.png");
+	ALLEGRO_BITMAP *ship3 = al_load_bitmap("ship3Large.png");
+
+
+	al_draw_filled_rectangle(windowWidth / 2 - 550, 300, windowWidth / 2 - 250, 600, al_map_rgba(51, 75, 102, 255));
+	al_draw_filled_rectangle(windowWidth / 2 - 150, 300, windowWidth / 2 + 150, 600, al_map_rgba(51, 75, 102, 255));
+	al_draw_filled_rectangle(windowWidth / 2 + 250, 300, windowWidth / 2 + 550, 600, al_map_rgba(51, 75, 102, 255));
+
+	if (wybor == 0) {
+		al_draw_filled_rectangle(windowWidth / 2 - 550, 300, windowWidth / 2 - 250, 600, al_map_rgba(85, 125, 170, 255));
+	}
+	if (wybor == 1) {
+		al_draw_filled_rectangle(windowWidth / 2 - 150, 300, windowWidth / 2 + 150, 600, al_map_rgba(85, 125, 170, 255));
+	}
+	if (wybor == 2) {
+		al_draw_filled_rectangle(windowWidth / 2 + 250, 300, windowWidth / 2 + 550, 600, al_map_rgba(85, 125, 170, 255));
+	}
+	al_draw_bitmap(ship1, windowWidth / 2 - 530, 322, 0);
+	al_draw_bitmap(ship2, windowWidth / 2 - 130, 322, 0);
+	al_draw_bitmap(ship3, windowWidth / 2 + 270, 322, 0);
+
+	al_destroy_bitmap(ship1);
+	al_destroy_bitmap(ship2);
+	al_destroy_bitmap(ship3);
+	
+}
+void shipChooseDrawStats(ALLEGRO_FONT *font18, struct sheep *player) {
+	
+	al_draw_textf(font18, al_map_rgb(255, 0, 255), 300, 100, 0, "HP %f", player->hp);
+	al_draw_textf(font18, al_map_rgb(255, 0, 255), 300, 120, 0, "AD %f", player->dmg);
+	al_draw_textf(font18, al_map_rgb(255, 0, 255), 300, 140, 0, "AMMO %f", player->ammo);
+	al_draw_textf(font18, al_map_rgb(255, 0, 255), 300, 160, 0, "MS %f", player->movementSpeed);
+
+}
 int main(void)
 {	
 	srand(time(NULL));
@@ -142,20 +223,17 @@ int main(void)
 		enemy[i].movementSpeed = 3.1;
 	}
 
-
-	
-
-
-
 	ALLEGRO_DISPLAY *display;
 	ALLEGRO_EVENT_QUEUE *queue;
 	ALLEGRO_TIMER *timer;
 	ALLEGRO_KEYBOARD_STATE keyboard;
 	
+
 	ALLEGRO_BITMAP *playerCharacter = NULL;
 	ALLEGRO_BITMAP *enemyCharacter = NULL; 
 	ALLEGRO_BITMAP *missle= NULL; 
 	
+
 	
 
 
@@ -172,7 +250,6 @@ int main(void)
 	queue = al_create_event_queue();
 	timer = al_create_timer(1.0 / FPS);
 	
-
 
 	al_clear_to_color(al_map_rgb(0, 0, 0));
 	
@@ -192,107 +269,53 @@ int main(void)
 	if (font18 == NULL) puts("nie wczytano czcionki");
 	if (enemyCharacter == NULL) puts("blad ladowania zdj enemy ");
 	
-	
-	bool running = true;
-	bool game = false;
-	bool menuRun = true;
-	bool shipChoose = false;
 
 	al_start_timer(timer);
 	
 	while (running) {
+
 		ALLEGRO_EVENT event;
 		al_wait_for_event(queue, &event);
 
-		if (menuRun) {
+		double czas = al_get_time();
 
+		if (event.type == ALLEGRO_EVENT_TIMER) {
+
+			al_set_target_bitmap(al_get_backbuffer(display));
+			al_clear_to_color(al_map_rgb(27, 39, 53));					// tlo okna
+
+		if (menuRun) {
 			
-			
-			if (event.type == ALLEGRO_EVENT_TIMER) {
-				double czas = al_get_time(); 
-				
-				al_set_target_bitmap(al_get_backbuffer(display));
-				al_clear_to_color(al_map_rgb(27, 39, 53));					// tlo okna
-				al_draw_textf(font18, al_map_rgb(255, 0, 255), windowWidth - 120, 0, 0, "Time: %f",czas);// text poziom
+				al_draw_textf(font18, al_map_rgb(255, 0, 255), windowWidth - 120, 0, 0, "Time: %f",czas); 
 
 				al_get_keyboard_state(&keyboard);
-				al_draw_filled_rectangle(windowWidth / 2 - 100, 100, windowWidth / 2 + 100, 200, al_map_rgba(0, 0, 0, 255));
-				al_draw_filled_rectangle(windowWidth / 2 - 100, 300, windowWidth / 2 + 100, 400, al_map_rgba(0, 0, 0, 255));
-				al_draw_filled_rectangle(windowWidth / 2 - 100, 500, windowWidth / 2 + 100, 600, al_map_rgba(0, 0, 0, 255));
-				gwazdki(100);
-				if (wybor == 0) {
-					al_draw_filled_rectangle(windowWidth / 2 - 100, 100, windowWidth / 2 + 100, 200, al_map_rgba(255, 0, 0, 255));
-				
-				}
-				if (wybor == 1) {
-					al_draw_filled_rectangle(windowWidth / 2 - 100, 300, windowWidth / 2 + 100, 400, al_map_rgba(255, 0, 0, 255));
-					
-				}
-				if (wybor == 2) {
-					al_draw_filled_rectangle(windowWidth / 2 - 100, 500, windowWidth / 2 + 100, 600, al_map_rgba(255, 0, 0, 255));
-					
-				}
 
-
-
-				if (al_key_down(&keyboard, ALLEGRO_KEY_ENTER)) {
-					if (wybor == 0) {
-						game = true;
-						menuRun = false;
-					}
-					if (wybor == 1) {
-						shipChoose = true;
-						menuRun = false;
-					}
-					if (wybor == 2) {
-						running = false;
-					}
-
-					
-				};
-				if (al_key_down(&keyboard, ALLEGRO_KEY_1)) {
-					wybor = 0;
-				};
-				if (al_key_down(&keyboard, ALLEGRO_KEY_2)) {
-					wybor = 1;
-				};
-				if (al_key_down(&keyboard, ALLEGRO_KEY_3)) {
-					wybor = 2;
-				};
-		
-
-
+				menuButtons(keyboard);
 
 				al_flip_display();
-			}
-
 		}
 
 		if (shipChoose) {
-			if (event.type == ALLEGRO_EVENT_TIMER) {
+		
 				double czas = al_get_time();
 
-				al_set_target_bitmap(al_get_backbuffer(display));
-				al_clear_to_color(al_map_rgb(27, 39, 53));					// tlo okna
 				al_draw_textf(font18, al_map_rgb(255, 0, 255), windowWidth - 120, 0, 0, "Time: %f", czas);// text poziom
 
 				al_get_keyboard_state(&keyboard);
-				al_draw_filled_rectangle(windowWidth / 2 - 550  , 300 , windowWidth / 2 -250  , 600, al_map_rgba(0, 0, 0, 255));
-				al_draw_filled_rectangle(windowWidth / 2 - 150  , 300 , windowWidth / 2 + 150   , 600, al_map_rgba(0, 0, 0, 255));
-				al_draw_filled_rectangle(windowWidth / 2 + 250  , 300 , windowWidth / 2 + 550  , 600, al_map_rgba(0, 0, 0, 255));
+			
+				shipChooseButtonsDrawing();
+
 				gwazdki(100);
 				if (wybor == 0) {
-					al_draw_filled_rectangle(windowWidth / 2 - 550, 300, windowWidth / 2 - 250, 600, al_map_rgba(0, 255, 0, 255));
 					player.hp = 250;
 					player.movementSpeed = 5.1;
 					player.dmg = 25;
 					player.ammo = 1000;
 					al_destroy_bitmap(playerCharacter);
 					playerCharacter = al_load_bitmap("ship1.png");
-					
+					shipChooseDrawStats(font18, &player);
 				}
 				if (wybor == 1) {
-					al_draw_filled_rectangle(windowWidth / 2 - 150, 300, windowWidth / 2 + 150, 600, al_map_rgba(0, 255, 0, 255));
 					player.hp = 500;
 					player.movementSpeed = 3.1;
 					player.dmg = 40;
@@ -301,7 +324,6 @@ int main(void)
 					playerCharacter = al_load_bitmap("ship2.png");
 				}
 				if (wybor == 2) {
-					al_draw_filled_rectangle(windowWidth / 2 + 250, 300, windowWidth / 2 + 550, 600, al_map_rgba(0, 255, 0, 255));
 					player.hp = 5000;
 					player.movementSpeed = 1.1;
 					player.dmg = 250;
@@ -331,19 +353,14 @@ int main(void)
 
 
 				al_flip_display();
-			}
+			
 		}
 
 		if(game){
 			
-					
-			if (event.type == ALLEGRO_EVENT_TIMER) {
 
-
-				al_set_target_bitmap(al_get_backbuffer(display));			
-				al_clear_to_color(al_map_rgb(27, 39, 53));					// tlo okna
 				al_draw_text(font18, al_map_rgb(255, 0, 255), windowWidth - 70, 0, 0, "LVL 0-1");// text poziom
-				al_draw_textf(font18, al_map_rgb(255, 0, 255), windowWidth - 120, 20, 0, "Player HP: %d", player.hp);	//  wypisanie hp 
+				al_draw_textf(font18, al_map_rgb(255, 0, 255), windowWidth - 150, 20, 0, "Player HP: %d", player.hp);	//  wypisanie hp 
 
 				al_get_keyboard_state(&keyboard);			
 
