@@ -19,14 +19,13 @@ const int playerBitmapSize = 80;
 float missley = 0;
 float misslex = 1280 / 2;
 
-
+int wybor = 0;
 struct sheep {
 	float x;
 	float y;
 	int hp;
 	int ammo;
 	float movementSpeed;
-	void(*playerDrawing)(struct sheep* player, ALLEGRO_BITMAP *kwadrat, ALLEGRO_FONT *font18);
 		void(*playerMovement)(struct sheep* player, ALLEGRO_EVENT event, ALLEGRO_KEYBOARD_STATE keyboard);
 			void(*playerShooting)(struct sheep* player);
 };
@@ -36,7 +35,6 @@ struct enemyShip {
 	float y;
 	int hp;
 	float movementSpeed;
-	void(*enemyDrawing)(struct enemyShip* player, ALLEGRO_BITMAP *kwadrat);
 		void(*playerMovement)(struct enemyShip* player, ALLEGRO_EVENT event, ALLEGRO_KEYBOARD_STATE keyboard);
 			void(*playerShooting)(struct enemyShip* player);
 };
@@ -52,35 +50,14 @@ void playerShooting(struct sheep* player, ALLEGRO_EVENT event, ALLEGRO_KEYBOARD_
 
 }
 
-void playerDrawing(struct sheep* player, ALLEGRO_BITMAP *kwadrat , ALLEGRO_FONT *font18) {  // rysowanie bitmapy pod playera 
-	                                                                                       	printf("x %fl \n",player->x);		
-			al_draw_bitmap(kwadrat, player->x,player->y - playerBitmapSize, 1); 
-			al_draw_textf(font18, al_map_rgb(255, 0, 255), windowWidth - 120, 20, 0,"Player HP: %d", player->hp);	//  wypisanie hp 
-}
 
-
-
-
-void enemyDrawing(struct enemyShip* enemy, ALLEGRO_BITMAP *kwadrat) {  // rysowanie bitmapy pod enemy mozna polaczyc z enemyLogic 
-                                                                       //	printf("x %fl \n", player->x); 
-	al_draw_bitmap(kwadrat, enemy->x, enemy->y - playerBitmapSize, 1);
-}
-
-bool colision(float mX, float mY , struct sheep *player) {
-	// nie moge ogarnac
-	if(mX >= player->x)
-	return true;
-	else {
-		return false;
-	}
-}
 
 void enemyLogic(ALLEGRO_BITMAP *enemyCharacter,struct enemyShip* enemy, struct sheep *player, ALLEGRO_BITMAP *missle) {  // rysowanie i poruszanie sie statku przeciwnika
 	
 
 	bool right = false;
 	bool left  = false;				
-	bool boolColision = false;
+	
 	float moveTO = rand() % windowWidth;
 																//	printf("%f , m1 = \n", moveTO);  losowana wart x
 	
@@ -91,11 +68,11 @@ void enemyLogic(ALLEGRO_BITMAP *enemyCharacter,struct enemyShip* enemy, struct s
 
 		
 		al_draw_bitmap(missle,misslex, missley+=5.1, 0);
-		if (missley >= windowHeight || boolColision) {  
+		if (missley >= windowHeight) {  
 			missley = 0;
 			misslex = enemy->x + 30;
 		}
-		boolColision = colision(misslex, missley, &player);
+		
 
 		if (moveTO >= enemy->x) {
 			right = true;
@@ -126,9 +103,9 @@ void playerMovement(struct sheep *player, ALLEGRO_EVENT event,ALLEGRO_KEYBOARD_S
 	if (player->x <= 0) player->x =  0;	
 }
 
-void closeOperation(ALLEGRO_EVENT event, bool *running) { // test przeslania eventu
+void closeOperation(ALLEGRO_EVENT event, bool *game) { // test przeslania eventu
 	if (event.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
-		*running = false;
+		*game = false;
 }
 
 void gwazdki(int ilosc) {
@@ -143,11 +120,13 @@ void gwazdki(int ilosc) {
 }
 
 
+
+
 int main(void)
 {	
 	srand(time(NULL));
 
-	struct sheep player = {windowWidth/2, windowHeight, 3, 20 , 5.1 ,playerDrawing,playerMovement}; // dziala jak konstruktor x,y,hp,ammo,speed
+	struct sheep player = {windowWidth/2, windowHeight, 3, 20 , 5.1,playerMovement}; // dziala jak konstruktor x,y,hp,ammo,speed
 	struct enemyShip enemy = { windowWidth / 2, 103, 3, 5.1 };
 	struct enemyShip enemy2 = { windowWidth / 2, 103, 3, 5.1 };
 
@@ -208,40 +187,102 @@ int main(void)
 	if (playerCharacter == NULL )	puts("blad ladowania zdj player");
 	if (font18 == NULL) puts("nie wczytano czcionki");
 	if (enemyCharacter == NULL) puts("blad ladowania zdj enemy ");
-	bool running = true;
 	
-		
-	al_start_timer(timer);
+	
+	bool running = true;
+	bool game = false;
+	bool menuRun = true;
 
+	al_start_timer(timer);
+	
 	while (running) {
 		ALLEGRO_EVENT event;
 		al_wait_for_event(queue, &event);
 
-		closeOperation(event, &running);		
-		if (event.type == ALLEGRO_EVENT_TIMER) {
+		if (menuRun) {
+			
+			
+			
+			if (event.type == ALLEGRO_EVENT_TIMER) {
 
 
-			al_set_target_bitmap(al_get_backbuffer(display));			
-			al_clear_to_color(al_map_rgb(27, 39, 53));					// tlo okna
-			al_draw_text(font18, al_map_rgb(255, 0, 255), windowWidth - 70, 0, 0, "LVL 0-1");// text poziom 
+				al_set_target_bitmap(al_get_backbuffer(display));
+				al_clear_to_color(al_map_rgb(27, 39, 53));					// tlo okna
+				al_draw_text(font18, al_map_rgb(255, 0, 255), windowWidth - 70, 0, 0, "LVL 0-1");// text poziom
 
-			al_get_keyboard_state(&keyboard);			
+				al_get_keyboard_state(&keyboard);
+				al_draw_filled_rectangle(windowWidth / 2 - 100, 100, windowWidth / 2 + 100, 200, al_map_rgba(0, 0, 0, 255));
+				al_draw_filled_rectangle(windowWidth / 2 - 100, 300, windowWidth / 2 + 100, 400, al_map_rgba(0, 0, 0, 255));
+				al_draw_filled_rectangle(windowWidth / 2 - 100, 500, windowWidth / 2 + 100, 600, al_map_rgba(0, 0, 0, 255));
 
-			gwazdki(100);
+				gwazdki(100);
+				if (wybor == 0) {
+					al_draw_filled_rectangle(windowWidth / 2 - 100, 100, windowWidth / 2 + 100, 200, al_map_rgba(255, 0, 0, 255));
+					
+				}
+				if (wybor == 1) {
+					
+					al_draw_filled_rectangle(windowWidth / 2 - 100, 300, windowWidth / 2 + 100, 400, al_map_rgba(255, 0, 0, 255));
+					
+				}
+				if (wybor == 2) {
+					
+					al_draw_filled_rectangle(windowWidth / 2 - 100, 500, windowWidth / 2 + 100, 600, al_map_rgba(255, 0, 0, 255));
+				}
+
+
+
+				if (al_key_down(&keyboard, ALLEGRO_KEY_LEFT)) {
+					game = true;
+					menuRun = false;
+				};
+				if (al_key_down(&keyboard, ALLEGRO_KEY_UP)) {
+					wybor--;
+					if (wybor < 0) {
+						wybor = 0;
+					}
+				};
+				if (al_key_down(&keyboard, ALLEGRO_KEY_DOWN)) {
+					wybor++;
+					if (wybor > 2) {
+						wybor = 2;
+					}
+				};
+
+
+
+				al_flip_display();
+			}
+
+		}
+		if(game){
+			
+					
+			if (event.type == ALLEGRO_EVENT_TIMER) {
+
+
+				al_set_target_bitmap(al_get_backbuffer(display));			
+				al_clear_to_color(al_map_rgb(27, 39, 53));					// tlo okna
+				al_draw_text(font18, al_map_rgb(255, 0, 255), windowWidth - 70, 0, 0, "LVL 0-1");// text poziom
+				al_draw_textf(font18, al_map_rgb(255, 0, 255), windowWidth - 120, 20, 0, "Player HP: %d", player.hp);	//  wypisanie hp 
+
+				al_get_keyboard_state(&keyboard);			
+
+				gwazdki(100);
 
 
 			
-			enemyDrawing(&enemy, kwadratPodEnemy);
-			enemyLogic(enemyCharacter, &enemy,&player, missle);
-			enemyLogic(enemyCharacter,&enemy2,&player,missle);
+				enemyLogic(enemyCharacter, &enemy,&player, missle);
+				enemyLogic(enemyCharacter,&enemy2,&player,missle);
 
-			player.playerDrawing(&player, kwadrat, font18);
-			player.playerMovement(&player, event, keyboard);
-			playerShooting(&player, event, keyboard);
-			al_draw_bitmap(playerCharacter, player.x, player.y - 130, 0); 
+				player.playerMovement(&player, event, keyboard);
+				playerShooting(&player, event, keyboard);
+				al_draw_bitmap(playerCharacter, player.x, player.y - 130, 0); 
 
 			
-			al_flip_display();
+				al_flip_display();
+			}
+			closeOperation(event, &running);
 		}
 	}
 	
