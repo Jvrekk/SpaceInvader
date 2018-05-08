@@ -196,17 +196,19 @@ void shipChooseButtonsDrawing() {
 	al_draw_bitmap(ship2, windowWidth / 2 - 130, 322, 0);
 	al_draw_bitmap(ship3, windowWidth / 2 + 270, 322, 0);
 
+	gwazdki(100);
+
 	al_destroy_bitmap(ship1);
 	al_destroy_bitmap(ship2);
 	al_destroy_bitmap(ship3);
 	
 }
-void shipChooseDrawStats(ALLEGRO_FONT *font18, struct sheep *player) {
+void shipChooseDrawStats(ALLEGRO_FONT *font24, struct sheep *player) {
 	
-	al_draw_textf(font18, al_map_rgb(255, 0, 255), 300, 100, 0, "HP %f", player->hp);
-	al_draw_textf(font18, al_map_rgb(255, 0, 255), 300, 120, 0, "AD %f", player->dmg);
-	al_draw_textf(font18, al_map_rgb(255, 0, 255), 300, 140, 0, "AMMO %f", player->ammo);
-	al_draw_textf(font18, al_map_rgb(255, 0, 255), 300, 160, 0, "MS %f", player->movementSpeed);
+	al_draw_textf(font24, al_map_rgb(255, 215, 0), 900, windowHeight - 420, 0, "HP %d", player->hp);
+	al_draw_textf(font24, al_map_rgb(255, 215, 0), 900, windowHeight - 400, 0, "AD %d", player->dmg);
+	al_draw_textf(font24, al_map_rgb(255, 215, 0), 900, windowHeight - 380, 0, "AMMO %d", player->ammo);
+	al_draw_textf(font24, al_map_rgb(255, 215, 0), 900, windowHeight - 360, 0, "MS %3f", player->movementSpeed);
 
 }
 int main(void)
@@ -244,7 +246,8 @@ int main(void)
 	al_init_ttf_addon();	
 
 	ALLEGRO_FONT *font18 = al_load_font("arial.ttf", 18, 0);  // wczytanie fonta , size , flags 	
-
+	ALLEGRO_FONT *font24 = al_load_font("arial.ttf", 24, 0);  // wczytanie fonta , size , flags 	
+	
 
 	display = al_create_display(windowWidth, windowHeight);
 	queue = al_create_event_queue();
@@ -255,7 +258,7 @@ int main(void)
 	
 
 
-	playerCharacter = al_load_bitmap("ship3.png");
+	playerCharacter = al_load_bitmap("ship1.png");
 	enemyCharacter = al_load_bitmap("enemy.png");
 	missle = al_load_bitmap("missle.png");
 
@@ -305,7 +308,7 @@ int main(void)
 			
 				shipChooseButtonsDrawing();
 
-				gwazdki(100);
+			
 				if (wybor == 0) {
 					player.hp = 250;
 					player.movementSpeed = 5.1;
@@ -313,7 +316,7 @@ int main(void)
 					player.ammo = 1000;
 					al_destroy_bitmap(playerCharacter);
 					playerCharacter = al_load_bitmap("ship1.png");
-					shipChooseDrawStats(font18, &player);
+					shipChooseDrawStats(font24, &player);
 				}
 				if (wybor == 1) {
 					player.hp = 500;
@@ -322,6 +325,7 @@ int main(void)
 					player.ammo = 100;
 					al_destroy_bitmap(playerCharacter);
 					playerCharacter = al_load_bitmap("ship2.png");
+					shipChooseDrawStats(font24, &player);
 				}
 				if (wybor == 2) {
 					player.hp = 5000;
@@ -330,6 +334,7 @@ int main(void)
 					player.ammo = 10;
 					al_destroy_bitmap(playerCharacter);
 					playerCharacter = al_load_bitmap("ship3.png");
+					shipChooseDrawStats(font24, &player);
 				}
 
 
