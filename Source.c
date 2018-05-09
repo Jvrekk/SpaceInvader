@@ -337,7 +337,7 @@ int main(void)
 	if (enemyCharacter == NULL) puts("blad ladowania zdj enemy ");
 	if (medKit == NULL) puts("blad ladowania zdj medKit ");
 
-	//al_play_sample_instance(songInstance);
+	al_play_sample_instance(songInstance);
 
 	al_start_timer(timer);
 
@@ -440,7 +440,7 @@ int main(void)
 				gwazdki(100);
 
 				spawnMedKit++;
-				if (spawnMedKit == 3000) {
+				if (spawnMedKit == 300) {
 					spawnMedKit = 0;
 					al_draw_bitmap(medKit, 500, 1, 0);
 				}
