@@ -249,27 +249,28 @@ void shipChooseDrawStats(ALLEGRO_FONT *font24, struct sheep *player) {
 
 }
 
-int main(void)
-{
-	srand(time(NULL));
-
-	struct sheep player = { windowWidth / 2, windowHeight, 250, 1000 , 25,5.1,playerMovement }; // dziala jak konstruktor x,y,hp,ammo,dmg,speed
-	struct enemyShip enemy[10];
-	struct enemyMissles enemyMisslesAr[10];
-
-	for (int i = 0; i < 10; i++) {
+void spawner(int x, struct enemyShip* enemy, struct enemyMissles* enemyMisslesAr) {
+	for (int i = 0; i < x; i++) {
 		enemy[i].x = rand() % windowWidth;
 		enemy[i].y = 103 + 20 * i;
 		enemy[i].hp = 40;
 		enemy[i].maxHp = 40;
 		enemy[i].movementSpeed = 3.1;
 	}
-
-	for (int i = 0; i < 10; i++) {
+	for (int i = 0; i < x; i++) {
 		enemyMisslesAr[i].x = enemy[i].x;
 		enemyMisslesAr[i].y = enemy[i].y;
 		enemyMisslesAr[i].movementSpeed = rand() % 5 + 2.1;
 	}
+}
+int main(void)
+{
+	srand(time(NULL));
+
+	struct sheep player = { windowWidth / 2, windowHeight, 250, 1000 , 25,5.1,playerMovement }; // dziala jak konstruktor x,y,hp,ammo,dmg,speed
+	struct enemyShip enemy[100];
+	struct enemyMissles enemyMisslesAr[100];
+	spawner(20,enemy,enemyMisslesAr); //spawnuje poczatkowe statki
 
 	ALLEGRO_DISPLAY *display;
 	ALLEGRO_EVENT_QUEUE *queue;
@@ -440,11 +441,13 @@ int main(void)
 				gwazdki(100);
 
 				spawnMedKit++;
-				if (spawnMedKit == 300) {
+				if (spawnMedKit == 1000) {
 					spawnMedKit = 0;
 					al_draw_bitmap(medKit, 500, 1, 0);
+					spawner(20, enemy, enemyMisslesAr);
+					player.ammo += 200;
 				}
-				for (int i = 0; i <10; i++)
+				for (int i = 0; i <100; i++)
 					enemyLogic(enemyCharacter, &enemy[i], &enemyMisslesAr[i], &player, missle, keyboard, event);
 
 				player.playerMovement(&player, event, keyboard);
