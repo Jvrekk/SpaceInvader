@@ -248,16 +248,16 @@ void shipChooseDrawStats(ALLEGRO_FONT *font24, struct sheep *player) {
 	al_draw_textf(font24, al_map_rgb(255, 215, 0), 560, windowHeight - 260, 0, "MS %3f", player->movementSpeed);
 
 }
-
-void spawner(int x, struct enemyShip* enemy, struct enemyMissles* enemyMisslesAr) {
-	for (int i = 0; i < x; i++) {
+int enemyAmount = 0;
+void spawner(int enemyAmount, int x, struct enemyShip* enemy, struct enemyMissles* enemyMisslesAr) {
+	for (int i = enemyAmount; i < x + enemyAmount; i++) {
 		enemy[i].x = rand() % windowWidth;
 		enemy[i].y = 103 + 20 * i;
 		enemy[i].hp = 40;
 		enemy[i].maxHp = 40;
 		enemy[i].movementSpeed = 3.1;
 	}
-	for (int i = 0; i < x; i++) {
+	for (int i = enemyAmount; i < x + enemyAmount; i++) {
 		enemyMisslesAr[i].x = enemy[i].x;
 		enemyMisslesAr[i].y = enemy[i].y;
 		enemyMisslesAr[i].movementSpeed = rand() % 5 + 2.1;
@@ -270,8 +270,8 @@ int main(void)
 	struct sheep player = { windowWidth / 2, windowHeight, 250, 1000 , 25,5.1,playerMovement }; // dziala jak konstruktor x,y,hp,ammo,dmg,speed
 	struct enemyShip enemy[100];
 	struct enemyMissles enemyMisslesAr[100];
-	spawner(20,enemy,enemyMisslesAr); //spawnuje poczatkowe statki
-
+	spawner(enemyAmount,5,enemy,enemyMisslesAr); //spawnuje poczatkowe statki
+	enemyAmount += 5;
 	ALLEGRO_DISPLAY *display;
 	ALLEGRO_EVENT_QUEUE *queue;
 	ALLEGRO_TIMER *timer;
@@ -441,11 +441,12 @@ int main(void)
 				gwazdki(100);
 
 				spawnMedKit++;
-				if (spawnMedKit == 1000) {
+				if (spawnMedKit == 300) {
 					spawnMedKit = 0;
 					al_draw_bitmap(medKit, 500, 1, 0);
-					spawner(20, enemy, enemyMisslesAr);
+					spawner(enemyAmount,5, enemy, enemyMisslesAr);
 					player.ammo += 200;
+					enemyAmount += 5;
 				}
 				for (int i = 0; i <100; i++)
 					enemyLogic(enemyCharacter, &enemy[i], &enemyMisslesAr[i], &player, missle, keyboard, event);
