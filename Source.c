@@ -63,6 +63,11 @@ struct enemyMissles {
 	float movementSpeed;
 };
 
+struct bullets {
+	int x;
+	int y;
+	int speed;
+};
 
 void playerShooting(struct sheep* player, ALLEGRO_EVENT event, ALLEGRO_KEYBOARD_STATE keyboard) {
 
@@ -79,7 +84,7 @@ void playerShooting(struct sheep* player, ALLEGRO_EVENT event, ALLEGRO_KEYBOARD_
 }
 
 void enemyLogic(ALLEGRO_BITMAP *enemyCharacter, struct enemyShip* enemy, struct enemyMissles* missleArr,
-	struct sheep *player, ALLEGRO_BITMAP *missle, ALLEGRO_KEYBOARD_STATE keyboard, ALLEGRO_EVENT event) {  // rysowanie i poruszanie sie statku przeciwnika
+	struct sheep *player, struct bullets* bullet, ALLEGRO_BITMAP *missle, ALLEGRO_KEYBOARD_STATE keyboard, ALLEGRO_EVENT event) {  // rysowanie i poruszanie sie statku przeciwnika
 
 
 	bool right = false;
@@ -247,12 +252,10 @@ void shipChooseDrawStats(ALLEGRO_FONT *font24, struct sheep *player) {
 
 }
 int enemyAmount = 0;
-int j = 0;
 void spawner(int enemyAmount, int x, struct enemyShip* enemy, struct enemyMissles* enemyMisslesAr) {
-	for (int i = enemyAmount; i < x + enemyAmount; i++,j++) {
+	for (int i = enemyAmount; i < x + enemyAmount; i++) {
 		enemy[i].x = rand() % windowWidth;
-		if (103 + 20 * j >= windowHeight / 2)  j = 0;
-		enemy[i].y = 103 + 20 * j;
+		enemy[i].y = 103 + rand()%200;
 		enemy[i].hp = 40;
 		enemy[i].maxHp = 40;
 		enemy[i].movementSpeed = 3.1;
@@ -263,6 +266,12 @@ void spawner(int enemyAmount, int x, struct enemyShip* enemy, struct enemyMissle
 		enemyMisslesAr[i].movementSpeed = rand() % 5 + 2.1;
 	}
 }
+int bulletAmount = 0;
+void bulletShooting(int bulletAmount, struct bullets* bullet, struct sheep *player) {
+	bullet[bulletAmount].x = player->x;
+	bullet[bulletAmount].y = player->y;
+	bullet[bulletAmount].speed = 10;
+}
 int main(void)
 {
 	srand(time(NULL));
@@ -270,6 +279,7 @@ int main(void)
 	struct sheep player = { windowWidth / 2, windowHeight, 250, 1000 , 25,5.1,playerMovement }; // dziala jak konstruktor x,y,hp,ammo,dmg,speed
 	struct enemyShip enemy[100];
 	struct enemyMissles enemyMisslesAr[100];
+	struct bullets bulletsArr[100];
 	spawner(enemyAmount,5,enemy,enemyMisslesAr); //spawnuje poczatkowe statki
 	enemyAmount += 5;
 
@@ -344,7 +354,7 @@ int main(void)
 	if (enemyCharacter == NULL) puts("blad ladowania zdj enemy ");
 	if (medKit == NULL) puts("blad ladowania zdj medKit ");
 
-	al_play_sample_instance(songInstance);
+	
 
 	al_start_timer(timer);
 
@@ -363,6 +373,7 @@ int main(void)
 			al_clear_to_color(al_map_rgb(27, 39, 53));					// tlo okna
 
 			if (startPage) {
+				al_play_sample_instance(songInstance);
 				al_play_sample(boomEffect, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, 0);
 				al_get_keyboard_state(&keyboard);
 				gwazdki(150);
@@ -463,15 +474,20 @@ int main(void)
 				gwazdki(100);
 
 				spawnMedKit++;
-				if (spawnMedKit == 300) {
+				if (spawnMedKit == 300) { //SPAWN ENEMY
 					spawnMedKit = 0;
 					al_draw_bitmap(medKit, 500, 1, 0);
 					spawner(enemyAmount,5, enemy, enemyMisslesAr);
 					player.ammo += 200;
 					enemyAmount += 5;
+					if (enemyAmount >= 100) enemyAmount = 0;
+				}
+
+				if (al_key_down(&keyboard, ALLEGRO_KEY_LSHIFT)) { //STRZELANIE BULLETAMI
+					bulletShooting(bulletAmount,bulletsArr,&player);
 				}
 				for (int i = 0; i <100; i++)
-					enemyLogic(enemyCharacter, &enemy[i], &enemyMisslesAr[i], &player, missle, keyboard, event);
+					enemyLogic(enemyCharacter, &enemy[i], &enemyMisslesAr[i], &player, &bulletsArr[i], missle, keyboard, event);
 
 				player.playerMovement(&player, event, keyboard);
 				playerShooting(&player, event, keyboard);
