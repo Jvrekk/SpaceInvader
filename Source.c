@@ -31,6 +31,7 @@ bool game = false;
 bool menuRun = false;
 bool shipChoose = false;
 bool startPage = true;
+bool gameOver = false;
 
 
 void delay(int mseconds) {
@@ -85,8 +86,9 @@ void playerShooting(struct sheep* player, ALLEGRO_EVENT event, ALLEGRO_KEYBOARD_
 
 void enemyLogic(ALLEGRO_BITMAP *enemyCharacter, struct enemyShip* enemy, struct enemyMissles* missleArr,
 	struct sheep *player, struct bullets* bullet, ALLEGRO_BITMAP *missle, ALLEGRO_KEYBOARD_STATE keyboard, ALLEGRO_EVENT event) {  // rysowanie i poruszanie sie statku przeciwnika
-
-
+	bullet->y -= bullet->speed;
+	//al_draw_filled_circle(bullet->x+64, bullet->y-120, 10, al_map_rgba(255, 255, 255, 100));
+	al_draw_filled_rectangle(bullet->x+60, bullet->y - 100, bullet->x + 70, bullet->y - 120, al_map_rgba(255, 255, 255, 100));//bullet
 	bool right = false;
 	bool left = false;
 
@@ -108,7 +110,12 @@ void enemyLogic(ALLEGRO_BITMAP *enemyCharacter, struct enemyShip* enemy, struct 
 			missleArr->y = enemy->y;
 			missleArr->x = enemy->x + 60;
 		}
-
+		if (!(enemy->x < bullet->x + 10 || enemy->x + 128 > bullet->x ||  // 1 width 2 width
+			enemy->y < bullet->y+20 || enemy->y + 128 >= bullet->y))  // 1 height 2 height
+		{
+			enemy->hp -= 25;
+			bullet->y = -100;
+		}
 
 
 		if (player->x <= enemy->x + 30 && player->x >= enemy->x - 30 && al_key_down(&keyboard, ALLEGRO_KEY_SPACE) && player->ammo>0) {
@@ -136,6 +143,7 @@ void enemyLogic(ALLEGRO_BITMAP *enemyCharacter, struct enemyShip* enemy, struct 
 
 		al_draw_filled_rectangle(enemy->x, enemy->y - 30, enemy->x + enemy->maxHp * 3.2, enemy->y - 20, al_map_rgba(0, 0, 0, 255));
 		al_draw_filled_rectangle(enemy->x, enemy->y - 30, enemy->x + enemy->hp * 3.2, enemy->y - 20, al_map_rgba(0, 215, 0, 100));
+		
 
 	}
 
@@ -267,6 +275,7 @@ void spawner(int enemyAmount, int x, struct enemyShip* enemy, struct enemyMissle
 	}
 }
 int bulletAmount = 0;
+int bulletTimer = 0;
 void bulletShooting(int bulletAmount, struct bullets* bullet, struct sheep *player) {
 	bullet[bulletAmount].x = player->x;
 	bullet[bulletAmount].y = player->y;
@@ -366,7 +375,7 @@ int main(void)
 		al_wait_for_event(queue, &event);
 
 		double czas = al_get_time();
-
+		
 		if (event.type == ALLEGRO_EVENT_TIMER) {
 
 			al_set_target_bitmap(al_get_backbuffer(display));
@@ -463,7 +472,10 @@ int main(void)
 			}
 
 			if (game) {
-
+				if (player.hp <= 0) {
+					game = false;
+					gameOver = true;
+				}
 
 				al_draw_text(font18, al_map_rgb(255, 255, 255), windowWidth - 70, 0, 0, "LVL 0-1");// text poziom
 				al_draw_textf(font18, al_map_rgb(255, 255, 255), windowWidth - 150, 20, 0, "HP: %d", player.hp);	//  wypisanie hp 
@@ -483,8 +495,16 @@ int main(void)
 					if (enemyAmount >= 100) enemyAmount = 0;
 				}
 
-				if (al_key_down(&keyboard, ALLEGRO_KEY_LSHIFT)) { //STRZELANIE BULLETAMI
-					bulletShooting(bulletAmount,bulletsArr,&player);
+				if (al_key_down(&keyboard, ALLEGRO_KEY_LSHIFT) && player.ammo > 10) { //STRZELANIE BULLETAMI
+					bulletTimer++;
+					if (bulletTimer > 10) {
+						bulletTimer = 0;
+						player.ammo -= 10;
+						bulletShooting(bulletAmount, bulletsArr, &player);
+						bulletAmount++;
+						if (bulletAmount >= 100) bulletAmount = 0;
+					}
+
 				}
 				for (int i = 0; i <100; i++)
 					enemyLogic(enemyCharacter, &enemy[i], &enemyMisslesAr[i], &player, &bulletsArr[i], missle, keyboard, event);
@@ -498,6 +518,20 @@ int main(void)
 					game = false;
 					menuRun = true;
 
+				};
+				al_flip_display();
+			}
+			if (gameOver) {
+				al_stop_sample_instance(songInstance);
+				al_play_sample(boomEffect, 5.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, 0);
+				al_get_keyboard_state(&keyboard);
+				gwazdki(150);
+				al_draw_text(font72, al_map_rgb(255, 0, 255), windowWidth / 2 - 275, windowHeight / 2 - 100, 0, " Game Over ");
+				al_draw_text(font18, al_map_rgb(255, 0, 255), windowWidth / 2 - 130, windowHeight / 2 + 30, 0, " press space to continue ");
+
+				if (al_key_down(&keyboard, ALLEGRO_KEY_SPACE)) {
+					gameOver = false;
+					running = false;
 				};
 				al_flip_display();
 			}
