@@ -13,6 +13,7 @@
 
 const float FPS = 60.0;
 
+
 const int windowHeight = 1024;
 const int windowWidth = 1280;
 
@@ -27,8 +28,9 @@ int size = 128;
 
 bool running = true;
 bool game = false;
-bool menuRun = true;
+bool menuRun = false;
 bool shipChoose = false;
+bool startPage = true;
 
 
 void delay(int mseconds) {
@@ -76,8 +78,6 @@ void playerShooting(struct sheep* player, ALLEGRO_EVENT event, ALLEGRO_KEYBOARD_
 
 }
 
-
-
 void enemyLogic(ALLEGRO_BITMAP *enemyCharacter, struct enemyShip* enemy, struct enemyMissles* missleArr,
 	struct sheep *player, ALLEGRO_BITMAP *missle, ALLEGRO_KEYBOARD_STATE keyboard, ALLEGRO_EVENT event) {  // rysowanie i poruszanie sie statku przeciwnika
 
@@ -96,15 +96,13 @@ void enemyLogic(ALLEGRO_BITMAP *enemyCharacter, struct enemyShip* enemy, struct 
 			missleArr->y = enemy->y;
 			missleArr->x = enemy->x + 60;
 		}
-		if (missleArr->x < player->x + 96 &&
-			missleArr->x + 32 > player->x &&
-			missleArr->y  < player->y + 128 &&
-			missleArr->y + 196  > player->y) {
+		if (!(player->x + 100 <= missleArr->x + 28 || player->x+28 >= missleArr->x + 38 ||  // 1 width 2 width
+			player->y + 128 <= missleArr->y || player->y - 128 >= missleArr->y + 64))  // 1 height 2 height
+		{ 	
 			player->hp -= 25;
 			missleArr->y = enemy->y;
 			missleArr->x = enemy->x + 60;
 		}
-
 
 
 
@@ -249,10 +247,12 @@ void shipChooseDrawStats(ALLEGRO_FONT *font24, struct sheep *player) {
 
 }
 int enemyAmount = 0;
+int j = 0;
 void spawner(int enemyAmount, int x, struct enemyShip* enemy, struct enemyMissles* enemyMisslesAr) {
-	for (int i = enemyAmount; i < x + enemyAmount; i++) {
+	for (int i = enemyAmount; i < x + enemyAmount; i++,j++) {
 		enemy[i].x = rand() % windowWidth;
-		enemy[i].y = 103 + 20 * i;
+		if (103 + 20 * j >= windowHeight / 2)  j = 0;
+		enemy[i].y = 103 + 20 * j;
 		enemy[i].hp = 40;
 		enemy[i].maxHp = 40;
 		enemy[i].movementSpeed = 3.1;
@@ -272,6 +272,8 @@ int main(void)
 	struct enemyMissles enemyMisslesAr[100];
 	spawner(enemyAmount,5,enemy,enemyMisslesAr); //spawnuje poczatkowe statki
 	enemyAmount += 5;
+
+
 	ALLEGRO_DISPLAY *display;
 	ALLEGRO_EVENT_QUEUE *queue;
 	ALLEGRO_TIMER *timer;
@@ -292,11 +294,10 @@ int main(void)
 	al_init_ttf_addon();
 	al_init_acodec_addon();
 
-	//al_reserve_samples(1);
-
 	ALLEGRO_FONT *font18 = al_load_font("arial.ttf", 18, 0);  // wczytanie fonta , size , flags 	
 	ALLEGRO_FONT *font24 = al_load_font("arial.ttf", 24, 0);  // wczytanie fonta , size , flags 	
 	ALLEGRO_FONT *font48 = al_load_font("arial.ttf", 36, 0);  // wczytanie fonta , size , flags 	
+	ALLEGRO_FONT *font72 = al_load_font("startPage.ttf", 72, 0);  // wczytanie fonta , size , flags 	
 
 
 	display = al_create_display(windowWidth, windowHeight);
@@ -320,7 +321,9 @@ int main(void)
 	al_register_event_source(queue, al_get_timer_event_source(timer));
 
 
-	al_reserve_samples(1);
+	al_reserve_samples(2);
+
+
 	ALLEGRO_SAMPLE *backgroundSong = al_load_sample("backgroundSong.wav");
 	ALLEGRO_SAMPLE_INSTANCE *songInstance = al_create_sample_instance(backgroundSong);
 	al_set_sample_instance_playmode(songInstance, ALLEGRO_PLAYMODE_LOOP);
@@ -330,6 +333,9 @@ int main(void)
 	}	if (songInstance == NULL) {
 		puts("blad ladowania istance");
 	}
+
+	ALLEGRO_SAMPLE *boomEffect = al_load_sample("boomEfect.wav");
+	if (boomEffect == NULL) puts("blad ladowania boom");
 
 
 	if (playerCharacter == NULL)	puts("blad ladowania zdj player");
@@ -355,6 +361,22 @@ int main(void)
 
 			al_set_target_bitmap(al_get_backbuffer(display));
 			al_clear_to_color(al_map_rgb(27, 39, 53));					// tlo okna
+
+			if (startPage) {
+				al_play_sample(boomEffect, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, 0);
+				al_get_keyboard_state(&keyboard);
+				gwazdki(150);
+				al_draw_text(font72, al_map_rgb(255, 0, 255), windowWidth/2 - 375, windowHeight/2 - 100 , 0, " SPACE INVADERS ");
+				al_draw_text(font18, al_map_rgb(255, 0, 255), windowWidth/2 - 130, windowHeight/2  + 30, 0, " press space to start the adventure ");
+			
+				if (al_key_down(&keyboard, ALLEGRO_KEY_SPACE)) {
+					
+					startPage = false;
+					menuRun = true;
+				};
+				al_flip_display();
+			}
+
 
 			if (menuRun) {
 
@@ -471,6 +493,7 @@ int main(void)
 	al_uninstall_keyboard();
 	al_shutdown_image_addon();
 	al_destroy_sample(backgroundSong);
+	al_destroy_sample(boomEffect);
 	al_destroy_sample_instance(songInstance);
 	al_destroy_bitmap(playerCharacter);
 	al_destroy_bitmap(missle);
