@@ -11,33 +11,26 @@
 #include <stdlib.h>
 #include <time.h>
 
-const float FPS = 60.0;
+#define ENEMYAMOUNT  100
 
+extern const float FPS;
+extern const int windowHeight;
+extern const int windowWidth;
+extern int points;
+extern const int playerBitmapSize;
+extern int wybor ;
+extern int size;
+extern int enemyAmount;
+extern int bulletAmount;
+extern int bulletTimer;
 
-const int windowHeight = 1024;
-const int windowWidth = 1280;
+extern bool running;
+extern bool game;
+extern bool menuRun;
+extern bool shipChoose;
+extern bool startPage;
+extern bool gameOver;
 
-const int playerBitmapSize = 80;
-
-float missley = 0;
-float misslex = 1280 / 2;
-
-int wybor = -1;
-
-int size = 128;
-
-bool running = true;
-bool game = false;
-bool menuRun = false;
-bool shipChoose = false;
-bool startPage = true;
-bool gameOver = false;
-
-
-void delay(int mseconds) {
-	clock_t goal = mseconds + clock();
-	while (goal > clock());
-}
 
 struct sheep {
 	float x;
@@ -68,56 +61,54 @@ struct bullets {
 	int x;
 	int y;
 	int speed;
-};
+};		
 
-void playerShooting(struct sheep* player, ALLEGRO_EVENT event, ALLEGRO_KEYBOARD_STATE keyboard) {
+
+void playerShooting(struct sheep* player, ALLEGRO_EVENT event, ALLEGRO_KEYBOARD_STATE keyboard) { 
 
 	int bulletX = player->x;
 	int bulletY = player->y;
-
 
 	if (al_key_down(&keyboard, ALLEGRO_KEY_SPACE) && player->ammo > 0) {
 		player->ammo--;
 		al_draw_filled_rectangle(bulletX + 63, bulletY, bulletX + 73, 0, al_map_rgba(255, 215, 0, 100));
 	}
-
-
 }
 
+void playerMovement(struct sheep *player, ALLEGRO_EVENT event, ALLEGRO_KEYBOARD_STATE keyboard) {
+	if (al_key_down(&keyboard, ALLEGRO_KEY_RIGHT)) player->x += player->movementSpeed;
+	if (al_key_down(&keyboard, ALLEGRO_KEY_LEFT))  player->x -= player->movementSpeed;
+
+	if (player->x >= windowWidth - playerBitmapSize) player->x = windowWidth - playerBitmapSize;
+	if (player->x <= 0) player->x = 0;
+}
+
+
+
 void enemyLogic(ALLEGRO_BITMAP *enemyCharacter, ALLEGRO_BITMAP *enemyCharacter50hp, struct enemyShip* enemy, struct enemyMissles* missleArr,
-	struct sheep *player, struct bullets* bullet, ALLEGRO_BITMAP *missle, ALLEGRO_KEYBOARD_STATE keyboard, ALLEGRO_EVENT event) {  // rysowanie i poruszanie sie statku przeciwnika
-	bullet->y -= bullet->speed;
-	//al_draw_filled_circle(bullet->x+64, bullet->y-120, 10, al_map_rgba(255, 255, 255, 100));
-	al_draw_filled_rectangle(bullet->x+60, bullet->y - 100, bullet->x + 70, bullet->y - 120, al_map_rgba(255, 255, 255, 100));//bullet
+	struct sheep *player, ALLEGRO_BITMAP *missle, ALLEGRO_KEYBOARD_STATE keyboard, ALLEGRO_EVENT event) {  // rysowanie i poruszanie sie statku przeciwnika
+	
 
 	int moveTO = rand() % windowWidth;
-	//printf("%f , m1 = \n", moveTO);
 
 	if (enemy->hp > 0) {
-
 
 		al_draw_bitmap(missle, missleArr->x, missleArr->y += missleArr->movementSpeed, 0);
 		if (missleArr->y >= windowHeight) {
 			missleArr->y = enemy->y;
 			missleArr->x = enemy->x + 60;
 		}
-		if (!(player->x + 100 <= missleArr->x + 28 ||   player->x+28 >= missleArr->x + 38 ||  // 1 width 2 width
-			  player->y + 128 <= missleArr->y      ||   player->y - 128 >= missleArr->y + 64))  // 1 height 2 height
+		if (!(player->x + 100 <= missleArr->x + 28 ||   player->x+28 >= missleArr->x + 38 || 
+			  player->y + 128 <= missleArr->y      ||   player->y - 128 >= missleArr->y + 64)) 
 		{ 	
 			player->hp -= 25;
 			missleArr->y = enemy->y;
 			missleArr->x = enemy->x + 60;
 		}
-		if (!(bullet->x + 10 <=  enemy->x  ||   bullet->x  >= enemy->x + 128 ||  // 1 width 2 width
-			  bullet->y +20 <= enemy->y    ||   bullet->y - 20 >= enemy->y + 100))  // 1 height 2 height
-		{
-			enemy->hp -= 25;
-			bullet->y = -999;
-		}
-
 
 		if (player->x <= enemy->x + 30 && player->x >= enemy->x - 30 && al_key_down(&keyboard, ALLEGRO_KEY_SPACE) && player->ammo>0) {
 			enemy->hp--;
+			points++;
 		}
 		if (moveTO >= enemy->x) {
 			if (enemy->hp > 25)
@@ -133,25 +124,19 @@ void enemyLogic(ALLEGRO_BITMAP *enemyCharacter, ALLEGRO_BITMAP *enemyCharacter50
 				al_draw_bitmap(enemyCharacter50hp, enemy->x -= 3, enemy->y - 103, 0);
 		}
 
-
-
 		al_draw_filled_rectangle(enemy->x, enemy->y - 30, enemy->x + enemy->maxHp * 3.2, enemy->y - 20, al_map_rgba(0, 0, 0, 255));
 		al_draw_filled_rectangle(enemy->x, enemy->y - 30, enemy->x + enemy->hp * 3.2, enemy->y - 20, al_map_rgba(0, 215, 0, 100));
 		
-
 	}
+	else{
+		enemy->x = -200;
+	}
+	
 
 }
 
-void playerMovement(struct sheep *player, ALLEGRO_EVENT event, ALLEGRO_KEYBOARD_STATE keyboard) {
-	if (al_key_down(&keyboard, ALLEGRO_KEY_RIGHT)) player->x += player->movementSpeed;
-	if (al_key_down(&keyboard, ALLEGRO_KEY_LEFT))  player->x -= player->movementSpeed;
 
-	if (player->x >= windowWidth - playerBitmapSize) player->x = windowWidth - playerBitmapSize;
-	if (player->x <= 0) player->x = 0;
-}
-
-void closeOperation(ALLEGRO_EVENT event, bool *game) { // test przeslania eventu
+void closeOperation(ALLEGRO_EVENT event, bool *game) { 
 	if (event.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
 		*game = false;
 }
@@ -168,25 +153,25 @@ void gwazdki(int ilosc) {
 }
 
 void menuButtons(ALLEGRO_FONT *font48, ALLEGRO_KEYBOARD_STATE keyboard) {
-	al_draw_filled_rectangle(windowWidth / 2 - 150, 250, windowWidth / 2 + 150, 350, al_map_rgba(51, 75, 102, 255));
-	al_draw_filled_rectangle(windowWidth / 2 - 150, 450, windowWidth / 2 + 150, 550, al_map_rgba(51, 75, 102, 255));
-	al_draw_filled_rectangle(windowWidth / 2 - 150, 650, windowWidth / 2 + 150, 750, al_map_rgba(51, 75, 102, 255));
+
+	ALLEGRO_COLOR colorGold = al_map_rgb(255, 215, 0);
+	ALLEGRO_COLOR colorButton = al_map_rgb(51, 75, 102);
+	ALLEGRO_COLOR colorFocus = al_map_rgb(85, 125, 170);
+
+	al_draw_filled_rectangle(windowWidth / 2 - 150, 250, windowWidth / 2 + 150, 350,colorButton);
+	al_draw_filled_rectangle(windowWidth / 2 - 150, 450, windowWidth / 2 + 150, 550, colorButton);
+	al_draw_filled_rectangle(windowWidth / 2 - 150, 650, windowWidth / 2 + 150, 750, colorButton);
+
 	gwazdki(100);
-	if (wybor == 0) {
-		al_draw_filled_rectangle(windowWidth / 2 - 150, 250, windowWidth / 2 + 150, 350, al_map_rgba(85, 125, 170, 255));
 
-	}
-	if (wybor == 1) {
-		al_draw_filled_rectangle(windowWidth / 2 - 150, 450, windowWidth / 2 + 150, 550, al_map_rgba(85, 125, 170, 255));
+	if (wybor == 0) al_draw_filled_rectangle(windowWidth / 2 - 150, 250, windowWidth / 2 + 150, 350, colorFocus);
+	if (wybor == 1)  al_draw_filled_rectangle(windowWidth / 2 - 150, 450, windowWidth / 2 + 150, 550, colorFocus);
+	if (wybor == 2) al_draw_filled_rectangle(windowWidth / 2 - 150, 650, windowWidth / 2 + 150, 750, colorFocus);
 
-	}
-	if (wybor == 2) {
-		al_draw_filled_rectangle(windowWidth / 2 - 150, 650, windowWidth / 2 + 150, 750, al_map_rgba(85, 125, 170, 255));
 
-	}
-	al_draw_textf(font48, al_map_rgb(255, 215, 0), windowWidth / 2 - 125, 280, 0, "Rozpocznij Gre");
-	al_draw_textf(font48, al_map_rgb(255, 215, 0), windowWidth / 2 - 100, 480, 0, "Zmien statek");
-	al_draw_textf(font48, al_map_rgb(255, 215, 0), windowWidth / 2 - 55, 680, 0, "Koniec");
+	al_draw_textf(font48, colorGold , windowWidth / 2 - 125, 280, 0, "Rozpocznij Gre");
+	al_draw_textf(font48, colorGold, windowWidth / 2 - 100, 480, 0, "Zmien statek");
+	al_draw_textf(font48, colorGold, windowWidth / 2 - 55, 680, 0, "Koniec");
 
 	if (al_key_down(&keyboard, ALLEGRO_KEY_ENTER)) {
 		if (wybor == 0) {
@@ -216,24 +201,23 @@ void menuButtons(ALLEGRO_FONT *font48, ALLEGRO_KEYBOARD_STATE keyboard) {
 
 void shipChooseButtonsDrawing() {
 
+	ALLEGRO_COLOR colorButton = al_map_rgb(51, 75, 102);
+	ALLEGRO_COLOR colorFocus = al_map_rgb(85, 125, 170);
+
 	ALLEGRO_BITMAP *ship1 = al_load_bitmap("ship1Large.png");
 	ALLEGRO_BITMAP *ship2 = al_load_bitmap("ship2Large.png");
 	ALLEGRO_BITMAP *ship3 = al_load_bitmap("ship3Large.png");
 
 
-	al_draw_filled_rectangle(windowWidth / 2 - 550, 300, windowWidth / 2 - 250, 600, al_map_rgba(51, 75, 102, 255));
-	al_draw_filled_rectangle(windowWidth / 2 - 150, 300, windowWidth / 2 + 150, 600, al_map_rgba(51, 75, 102, 255));
-	al_draw_filled_rectangle(windowWidth / 2 + 250, 300, windowWidth / 2 + 550, 600, al_map_rgba(51, 75, 102, 255));
+	al_draw_filled_rectangle(windowWidth / 2 - 550, 300, windowWidth / 2 - 250, 600, colorButton);
+	al_draw_filled_rectangle(windowWidth / 2 - 150, 300, windowWidth / 2 + 150, 600, colorButton);
+	al_draw_filled_rectangle(windowWidth / 2 + 250, 300, windowWidth / 2 + 550, 600, colorButton);
 
-	if (wybor == 0) {
-		al_draw_filled_rectangle(windowWidth / 2 - 550, 300, windowWidth / 2 - 250, 600, al_map_rgba(85, 125, 170, 255));
-	}
-	if (wybor == 1) {
-		al_draw_filled_rectangle(windowWidth / 2 - 150, 300, windowWidth / 2 + 150, 600, al_map_rgba(85, 125, 170, 255));
-	}
-	if (wybor == 2) {
-		al_draw_filled_rectangle(windowWidth / 2 + 250, 300, windowWidth / 2 + 550, 600, al_map_rgba(85, 125, 170, 255));
-	}
+	if (wybor == 0) al_draw_filled_rectangle(windowWidth / 2 - 550, 300, windowWidth / 2 - 250, 600, colorFocus);
+	if (wybor == 1) al_draw_filled_rectangle(windowWidth / 2 - 150, 300, windowWidth / 2 + 150, 600, colorFocus);
+	if (wybor == 2) al_draw_filled_rectangle(windowWidth / 2 + 250, 300, windowWidth / 2 + 550, 600, colorFocus);
+
+
 	al_draw_bitmap(ship1, windowWidth / 2 - 530, 322, 0);
 	al_draw_bitmap(ship2, windowWidth / 2 - 130, 322, 0);
 	al_draw_bitmap(ship3, windowWidth / 2 + 270, 322, 0);
@@ -245,16 +229,16 @@ void shipChooseButtonsDrawing() {
 	al_destroy_bitmap(ship3);
 
 }
+
 void shipChooseDrawStats(ALLEGRO_FONT *font24, struct sheep *player) {
+	ALLEGRO_COLOR colorGold = al_map_rgb(255, 215, 0);
 
-	al_draw_textf(font24, al_map_rgb(255, 215, 0), 560, windowHeight - 320, 0, "HP %d", player->hp);
-	al_draw_textf(font24, al_map_rgb(255, 215, 0), 560, windowHeight - 300, 0, "AD %d", player->dmg);
-	al_draw_textf(font24, al_map_rgb(255, 215, 0), 560, windowHeight - 280, 0, "AMMO %d", player->ammo);
-	al_draw_textf(font24, al_map_rgb(255, 215, 0), 560, windowHeight - 260, 0, "MS %3f", player->movementSpeed);
-
+	al_draw_textf(font24, colorGold, 560, windowHeight - 320, 0, "HP %d", player->hp);
+	al_draw_textf(font24, colorGold, 560, windowHeight - 300, 0, "AD %d", player->dmg);
+	al_draw_textf(font24, colorGold, 560, windowHeight - 280, 0, "AMMO %d", player->ammo);
+	al_draw_textf(font24, colorGold, 560, windowHeight - 260, 0, "MS %3f", player->movementSpeed);
 }
-int enemyAmount = 0;
-void spawner(int enemyAmount, int x, struct enemyShip* enemy, struct enemyMissles* enemyMisslesAr) {
+ void spawner(int enemyAmount, int x, struct enemyShip* enemy, struct enemyMissles* enemyMisslesAr) {
 	for (int i = enemyAmount; i < x + enemyAmount; i++) {
 		enemy[i].x = rand() % windowWidth;
 		enemy[i].y = 103 + rand()%200;
@@ -265,28 +249,59 @@ void spawner(int enemyAmount, int x, struct enemyShip* enemy, struct enemyMissle
 	for (int i = enemyAmount; i < x + enemyAmount; i++) {
 		enemyMisslesAr[i].x = enemy[i].x;
 		enemyMisslesAr[i].y = enemy[i].y;
-		enemyMisslesAr[i].movementSpeed = rand() % 5 + 2.1;
+		enemyMisslesAr[i].movementSpeed = rand() % 5 + 5.1;
 	}
 }
-int bulletAmount = 0;
-int bulletTimer = 0;
+
 void bulletShooting(int bulletAmount, struct bullets* bullet, struct sheep *player) {
 	bullet[bulletAmount].x = player->x;
 	bullet[bulletAmount].y = player->y;
-	bullet[bulletAmount].speed = 10;
+	bullet[bulletAmount].speed = 20;
 }
+
+void collisionDetector(struct enemyShip enemy[ENEMYAMOUNT],struct bullets bullet[ENEMYAMOUNT]) {
+	
+
+	for(int i = 0;i<ENEMYAMOUNT;i++){
+		bullet[i].y -= bullet[i].speed;
+		al_draw_filled_rectangle(bullet[i].x + 60, bullet[i].y - 100, bullet[i].x + 70, bullet[i].y - 120, al_map_rgba(255, 255, 255, 100));//bullet
+		for (int j = 0; j < ENEMYAMOUNT; j++) {
+			if (!(bullet[i].x + 10 <= enemy[j].x || bullet[i].x >= enemy[j].x + 128 ||  // 1 width 2 width
+				bullet[i].y + 20 <= enemy[j].y || bullet[i].y - 10 >= enemy[j].y + 100))  // 1 height 2 height
+			{
+			enemy[j].hp -= 20;
+			bullet[i].y = -999;
+			points+=20;
+			}
+		}
+	}
+}
+
+bool nextWave(double time) {
+	ALLEGRO_COLOR nextLvl = al_map_rgb(51, 75, 102);
+	bool wave = false;
+		if (time >= 15 && time <= 18)
+			wave = true;
+		if (time >= 22 && time <= 24)
+		wave = true;
+		if (time >= 28 && time <= 30)
+		wave = true;
+		
+	return wave;
+}
+
 int main(void)
 {
 	srand(time(NULL));
 
 	struct sheep player = { windowWidth / 2, windowHeight, 250, 1000 , 25,5.1,playerMovement }; // dziala jak konstruktor x,y,hp,ammo,dmg,speed
-	struct enemyShip enemy[100];
-	struct enemyMissles enemyMisslesAr[100];
-	struct bullets bulletsArr[100];
-	spawner(enemyAmount,5,enemy,enemyMisslesAr); //spawnuje poczatkowe statki
-	enemyAmount += 5;
+	struct enemyShip enemy[ENEMYAMOUNT];
+	struct enemyMissles enemyMisslesAr[ENEMYAMOUNT];
+	struct bullets bulletsArr[ENEMYAMOUNT];
+	spawner(enemyAmount,15,enemy,enemyMisslesAr); //spawnuje poczatkowe statki
+	enemyAmount += 15;
 
-
+	
 	ALLEGRO_DISPLAY *display;
 	ALLEGRO_EVENT_QUEUE *queue;
 	ALLEGRO_TIMER *timer;
@@ -479,6 +494,9 @@ int main(void)
 				al_draw_text(font18, al_map_rgb(255, 255, 255), windowWidth - 70, 0, 0, "LVL 0-1");// text poziom
 				al_draw_textf(font18, al_map_rgb(255, 255, 255), windowWidth - 150, 20, 0, "HP: %d", player.hp);	//  wypisanie hp 
 				al_draw_textf(font18, al_map_rgb(255, 255, 255), windowWidth - 150, 40, 0, "AMMO: %d", player.ammo);	//  wypisanie ammo 
+				al_draw_textf(font18, al_map_rgb(255, 255, 255), windowWidth - 150, 60, 0, "time : %f", czas);	//  wypisanie ammo 
+				al_draw_textf(font18, al_map_rgb(255, 255, 255), windowWidth - 150, 80, 0, "pkt : %d", points);	//  wypisanie ammo 
+				
 
 				al_get_keyboard_state(&keyboard);
 
@@ -488,7 +506,11 @@ int main(void)
 				if (spawnMedKit == 300) { //SPAWN ENEMY
 					spawnMedKit = 0;
 					al_draw_bitmap(medKit, 500, 1, 0);
-					spawner(enemyAmount,5, enemy, enemyMisslesAr);
+					if(nextWave(czas))
+					spawner(enemyAmount, 15, enemy, enemyMisslesAr); 
+				
+					
+
 					player.ammo += 200;
 					enemyAmount += 5;
 					if (enemyAmount >= 100) enemyAmount = 0;
@@ -502,13 +524,14 @@ int main(void)
 						bulletShooting(bulletAmount, bulletsArr, &player);
 						bulletAmount++;
 						al_play_sample(shiftShoot, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, 0);
-						if (bulletAmount >= 100) bulletAmount = 0;
+						if (bulletAmount >= ENEMYAMOUNT) bulletAmount = 0;
 					}
 
 				}
 				for (int i = 0; i <100; i++)
-					enemyLogic(enemyCharacter,enemyCharacter50hp, &enemy[i], &enemyMisslesAr[i], &player, &bulletsArr[i], missle, keyboard, event);
+					enemyLogic(enemyCharacter,enemyCharacter50hp, &enemy[i], &enemyMisslesAr[i], &player, missle, keyboard, event);
 
+				collisionDetector(&enemy, &bulletsArr);
 				player.playerMovement(&player, event, keyboard);
 				playerShooting(&player, event, keyboard);
 				al_draw_bitmap(playerCharacter, player.x, player.y - 130, 0);

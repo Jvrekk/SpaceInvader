@@ -125,6 +125,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="struktury.c" />
+    <ClCompile Include="zmmienne.c" />
     <ClCompile Include="Source.c" />
   </ItemGroup>
   <ItemGroup>
