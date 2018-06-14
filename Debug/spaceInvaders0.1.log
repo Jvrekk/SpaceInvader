@@ -1,11 +1,6 @@
 ﻿  Source.c
-c:\users\user\source\repos\spaceinvaders0.1\source.c(281): warning C4101: 'nextLvl': unreferenced local variable
-c:\users\user\source\repos\spaceinvaders0.1\source.c(534): warning C4047: 'function': 'enemyShip *' differs in levels of indirection from 'enemyShip (*)[100]'
-c:\users\user\source\repos\spaceinvaders0.1\source.c(534): warning C4024: 'collisionDetector': different types for formal and actual parameter 1
-c:\users\user\source\repos\spaceinvaders0.1\source.c(534): warning C4047: 'function': 'bullets *' differs in levels of indirection from 'bullets (*)[100]'
-c:\users\user\source\repos\spaceinvaders0.1\source.c(534): warning C4024: 'collisionDetector': different types for formal and actual parameter 2
-  struktury.c
-  zmmienne.c
-  Generating Code...
-  LINK : C:\Users\user\source\repos\spaceInvaders0.1\Debug\spaceInvaders0.1.exe not found or not built by the last incremental link; performing full link
-  spaceInvaders0.1.vcxproj -> C:\Users\user\source\repos\spaceInvaders0.1\Debug\spaceInvaders0.1.exe
+c:\users\jvrekk\source\repos\spaceinvader\source.c(526): warning C4047: "funkcja": "enemyShip *" różni się w poziomach operatorów pośrednich od "enemyShip (*)[1000]"
+c:\users\jvrekk\source\repos\spaceinvader\source.c(526): warning C4024: "collisionDetector": różne typy dla formalnego i rzeczywistego parametru 1
+c:\users\jvrekk\source\repos\spaceinvader\source.c(526): warning C4047: "funkcja": "bullets *" różni się w poziomach operatorów pośrednich od "bullets (*)[1000]"
+c:\users\jvrekk\source\repos\spaceinvader\source.c(526): warning C4024: "collisionDetector": różne typy dla formalnego i rzeczywistego parametru 2
+  spaceInvaders0.1.vcxproj -> C:\Users\Jvrekk\source\repos\SpaceInvader\Debug\spaceInvaders0.1.exe

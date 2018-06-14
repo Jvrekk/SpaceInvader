@@ -11,7 +11,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-#define ENEMYAMOUNT  100
+#define ENEMYAMOUNT  1000
 
 extern const float FPS;
 extern const int windowHeight;
@@ -48,6 +48,7 @@ struct enemyShip {
 	float y;
 	int hp;
 	int maxHp;
+	int alive;
 	float movementSpeed;
 };
 
@@ -108,7 +109,6 @@ void enemyLogic(ALLEGRO_BITMAP *enemyCharacter, ALLEGRO_BITMAP *enemyCharacter50
 
 		if (player->x <= enemy->x + 30 && player->x >= enemy->x - 30 && al_key_down(&keyboard, ALLEGRO_KEY_SPACE) && player->ammo>0) {
 			enemy->hp--;
-			points++;
 		}
 		if (moveTO >= enemy->x) {
 			if (enemy->hp > 25)
@@ -130,6 +130,7 @@ void enemyLogic(ALLEGRO_BITMAP *enemyCharacter, ALLEGRO_BITMAP *enemyCharacter50
 	}
 	else{
 		enemy->x = -200;
+		enemy->alive = 1;
 	}
 	
 
@@ -244,6 +245,7 @@ void shipChooseDrawStats(ALLEGRO_FONT *font24, struct sheep *player) {
 		enemy[i].y = 103 + rand()%200;
 		enemy[i].hp = 40;
 		enemy[i].maxHp = 40;
+		enemy[i].alive = 0;
 		enemy[i].movementSpeed = 3.1;
 	}
 	for (int i = enemyAmount; i < x + enemyAmount; i++) {
@@ -258,7 +260,14 @@ void bulletShooting(int bulletAmount, struct bullets* bullet, struct sheep *play
 	bullet[bulletAmount].y = player->y;
 	bullet[bulletAmount].speed = 20;
 }
-
+int howManySpawn = 5;
+int counter(int enemyAmount, struct enemyShip enemy[ENEMYAMOUNT]) {
+	int sumaPkt = 0;
+	for (int i = 0; i < enemyAmount; i++) {
+		sumaPkt += enemy[i].alive;
+	}
+	return sumaPkt;
+}
 void collisionDetector(struct enemyShip enemy[ENEMYAMOUNT],struct bullets bullet[ENEMYAMOUNT]) {
 	
 
@@ -271,24 +280,11 @@ void collisionDetector(struct enemyShip enemy[ENEMYAMOUNT],struct bullets bullet
 			{
 			enemy[j].hp -= 20;
 			bullet[i].y = -999;
-			points+=20;
 			}
 		}
 	}
 }
 
-bool nextWave(double time) {
-	ALLEGRO_COLOR nextLvl = al_map_rgb(51, 75, 102);
-	bool wave = false;
-		if (time >= 15 && time <= 18)
-			wave = true;
-		if (time >= 22 && time <= 24)
-		wave = true;
-		if (time >= 28 && time <= 30)
-		wave = true;
-		
-	return wave;
-}
 
 int main(void)
 {
@@ -298,8 +294,8 @@ int main(void)
 	struct enemyShip enemy[ENEMYAMOUNT];
 	struct enemyMissles enemyMisslesAr[ENEMYAMOUNT];
 	struct bullets bulletsArr[ENEMYAMOUNT];
-	spawner(enemyAmount,15,enemy,enemyMisslesAr); //spawnuje poczatkowe statki
-	enemyAmount += 15;
+	spawner(enemyAmount, howManySpawn,enemy,enemyMisslesAr); //spawnuje poczatkowe statki
+	enemyAmount += howManySpawn;
 
 	
 	ALLEGRO_DISPLAY *display;
@@ -490,30 +486,26 @@ int main(void)
 					game = false;
 					gameOver = true;
 				}
-
+				
 				al_draw_text(font18, al_map_rgb(255, 255, 255), windowWidth - 70, 0, 0, "LVL 0-1");// text poziom
 				al_draw_textf(font18, al_map_rgb(255, 255, 255), windowWidth - 150, 20, 0, "HP: %d", player.hp);	//  wypisanie hp 
 				al_draw_textf(font18, al_map_rgb(255, 255, 255), windowWidth - 150, 40, 0, "AMMO: %d", player.ammo);	//  wypisanie ammo 
 				al_draw_textf(font18, al_map_rgb(255, 255, 255), windowWidth - 150, 60, 0, "time : %f", czas);	//  wypisanie ammo 
-				al_draw_textf(font18, al_map_rgb(255, 255, 255), windowWidth - 150, 80, 0, "pkt : %d", points);	//  wypisanie ammo 
+				al_draw_textf(font18, al_map_rgb(255, 255, 255), windowWidth - 150, 80, 0, "pkt : %d", counter(enemyAmount, enemy));	//  wypisanie pkt 
+				al_draw_textf(font18, al_map_rgb(255, 255, 255), windowWidth - 80, 80, 0, "/%d", enemyAmount);	//  wypisanie pkt 
 				
 
 				al_get_keyboard_state(&keyboard);
 
 				gwazdki(100);
-
-				spawnMedKit++;
-				if (spawnMedKit == 300) { //SPAWN ENEMY
-					spawnMedKit = 0;
-					al_draw_bitmap(medKit, 500, 1, 0);
-					if(nextWave(czas))
-					spawner(enemyAmount, 15, enemy, enemyMisslesAr); 
 				
-					
-
-					player.ammo += 200;
-					enemyAmount += 5;
-					if (enemyAmount >= 100) enemyAmount = 0;
+				if (counter(enemyAmount, enemy)>= enemyAmount) { //SPAWN ENEMY
+					howManySpawn += 5;
+					spawner(enemyAmount, howManySpawn, enemy, enemyMisslesAr);
+					player.hp += 100;
+					player.ammo += 1000;
+					enemyAmount += howManySpawn;
+					if (enemyAmount >= ENEMYAMOUNT) enemyAmount = 0;
 				}
 
 				if (al_key_down(&keyboard, ALLEGRO_KEY_LSHIFT) && player.ammo > 10) { //STRZELANIE BULLETAMI
