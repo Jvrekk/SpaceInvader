@@ -1,5 +1,5 @@
 # SpaceInvader
-Projekt na zaliczenie z pp
+Projekt na zaliczenie z pp, C & ALLEGRO
 ![spaceHome](https://user-images.githubusercontent.com/34125361/55673822-752d4b80-58ad-11e9-9a86-f4790c4d94f5.png)
 
 ![spaceMenu](https://user-images.githubusercontent.com/34125361/55673823-78c0d280-58ad-11e9-973f-f466b803eac7.png)
